@@ -4,7 +4,7 @@ library(lme4)
 library(ggplot2)
 
 #read-in and load packages
-dendrodat <- read.csv('F:/FIG/Dendrometer/dendrometer-data-corrected.csv')
+dendrodat <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrometer-data-corrected.csv')
 #summary(dendrodat)
 
 #making numeric vars factors as needed
@@ -50,6 +50,14 @@ dendrodat[dendrodat==999] <- NA
 # table(dendrodat$spcode,dendrodat$dominance) #most trees are co-dominant
 # table(dendrodat$tension,dendrodat$baselinedbh) #low tension dendrometers were used below 21.1 in DBH
 
+#growth rates by month only (mean of all years per individual)
+dendrodat$maygrow <- rowMeans(subset(dendrodat,select=c(may16grow,may17grow)),na.rm=TRUE)
+dendrodat$jungrow <- rowMeans(subset(dendrodat,select=c(jun15grow,jun16grow,jun17grow)),na.rm=TRUE)
+dendrodat$julgrow <- rowMeans(subset(dendrodat,select=c(jul15grow,jul16grow,jul17grow)),na.rm=TRUE)
+dendrodat$auggrow <- rowMeans(subset(dendrodat,select=c(aug15grow,aug16grow,aug17grow)),na.rm=TRUE)
+dendrodat$sepgrow <- rowMeans(subset(dendrodat,select=c(sep15grow,sep16grow,sep17grow)),na.rm=TRUE)
+dendrodat$octgrow <- rowMeans(subset(dendrodat,select=c(oct15grow,oct16grow,oct17grow)),na.rm=TRUE)
+
 #separate datasets for each species
 poplar <- dendrodat[dendrodat$spcode=='LITU',]
 chestnutoak <- dendrodat[dendrodat$spcode=='QUMO',]
@@ -61,11 +69,3 @@ redmaple <- dendrodat[dendrodat$spcode=='ACRU',]
 blackbirch <- dendrodat[dendrodat$spcode=='BELE',]
 hemlock <- dendrodat[dendrodat$spcode=='TCSA',]
 aspen <- dendrodat[dendrodat$spcode=='POGR',]
-
-#growth rates by month only (mean of all years per individual)
-dendrodat$maygrow <- rowMeans(subset(dendrodat,select=c(may16grow,may17grow)),na.rm=TRUE)
-dendrodat$jungrow <- rowMeans(subset(dendrodat,select=c(jun15grow,jun16grow,jun17grow)),na.rm=TRUE)
-dendrodat$julgrow <- rowMeans(subset(dendrodat,select=c(jul15grow,jul16grow,jul17grow)),na.rm=TRUE)
-dendrodat$auggrow <- rowMeans(subset(dendrodat,select=c(aug15grow,aug16grow,aug17grow)),na.rm=TRUE)
-dendrodat$sepgrow <- rowMeans(subset(dendrodat,select=c(sep15grow,sep16grow,sep17grow)),na.rm=TRUE)
-dendrodat$octgrow <- rowMeans(subset(dendrodat,select=c(oct15grow,oct16grow,oct17grow)),na.rm=TRUE)
