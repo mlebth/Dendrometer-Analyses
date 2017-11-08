@@ -1,0 +1,43 @@
+Dataset names: dendrometer-data.csv: original data
+	       dendrometer-data-corrected.csv: monthly growth corrected--monthly average
+						taken where more than one month elapsed
+						between measurements (2015 only)
+
+Variables:
+treeid [num]            = individual tree id 
+spnum [num]             = forestry species code 
+spname [char]           = tree common name 
+spcode [char]           = 4-letter USDA species code 
+site [char]             = FTIG site code (B6B, B10B, C03x [x added for consistency of variable length]) 
+aspect [char]           = south (S) or north (N)--this is associated with site, not individual
+sitequal [num]          = site quality (1: , 2: , 3: ).--this is associated with the individual tree, not the site
+timbersale [char]       = Y (thinned ) or N (unthinned) 
+dominance [char]        = dominant (D), co-dominant (C), or intermediate (I) 
+baselinedbh [num]       = DBH at date of first installation (in inches) 
+tension [char]          = lo, hi or na -- densiometer tension. only available for trees 1-24 (24-32: na) 
+jun15mm-oct17mm [num]   = growth in mm of trees from previous month's measurement* 
+tot15mm-tot17mm [num]   = total growth in mm of each tree from April-October* 
+jun15rain-oct17rain [num] = total precipitation (inches) in previous month. If more than one month passed
+			  between measurements, the value was divided by the number of intervening
+			  months for a monthly average. Only in dataset when there is also a measurement.
+jun15temp-oct17temp	= average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement.
+tot15rain-tot17rain	= total rainfall from initial band placement to last measurement
+tot15temp-tot17temp	= average high temperature from initial band placement to last measurement
+*for measurements: in dataset as '999' if value is missing
+
+
+Analysis plan:
+--descriptive stats first: simple visualizations of growth over time,
+	proc freq of number of trees of each sp in each site/sitequal/timbersale/dominance
+
+--total growth each year ~ spcode aspect sitequal timbersale dominance tension prevmonthmm prevmonthrain prevmonthtemp | site
+--growth each month      ~ spcode aspect sitequal timbersale dominance tension prevmonthmm prevmonthrain prevmonthtemp | site
+can also run by spcode (separate analyses for each sp)
+****site may or may not be able to be used as a random variable--in some month-year combinations
+there are only 2 sites represented; at most there are 3. ALSO, if doing this by species
+then there are going to be generally only 2 observations per site-month-year.
+
+tim wants 3 things: 
+1) does timbersale make a difference (t-tests)
+2) do other variables make a difference (anovas)
+3) do months differ significantly from one another (anovas)
