@@ -20,8 +20,8 @@ dendrodat$sitequal <- factor(dendrodat$sitequal)
 dendrodat[dendrodat==999] <- NA
 
 ###############################Variables:
-#treeid [char]            = individual tree id 
-#spnum [char]             = forestry species code 
+#treeid [char]           = individual tree id 
+#spnum [char]            = forestry species code 
 #spname [char]           = tree common name 
 #spcode [char]           = 4-letter USDA species code 
 #site [char]             = FTIG site code (B6B, B10B, C03x [x added for consistency of variable length]) 
@@ -36,9 +36,9 @@ dendrodat[dendrodat==999] <- NA
 #jun15rain-oct17rain [num] = total precipitation (inches) in previous month. If more than one month passed
 #between measurements, the value was divided by the number of intervening
 #months for a monthly average. Only in dataset when there is also a measurement.
-#jun15temp-oct17temp	= average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement.
-#tot15rain-tot17rain	= total rainfall from initial band placement to last measurement
-#tot15temp-tot17temp	= average high temperature from initial band placement to last measurement
+#jun15temp-oct17temp	 = average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement.
+#tot15rain-tot17rain	 = total rainfall from initial band placement to last measurement
+#tot15temp-tot17temp	 = average high temperature from initial band placement to last measurement
 ####  *for measurements: in dataset as '999' if value is missing
 
 #exploratory
@@ -78,32 +78,32 @@ dendrodat$octtemp <- rowMeans(subset(dendrodat,select=c(oct15temp,oct16temp,oct1
 #problem: some numbers are not integers, problematic with poisson and negbin distributions.
 # dendrodat$jul15grow%%1==0 #integer check
 #rounds up when there is a non-integer
-#####################################################11-9-17 HAHAHA ok this is all completely unnecessary. just use ceiling(x). D'oh###########
 ###################2015
-dendrodat$jul15grow <- ifelse(dendrodat$jul15grow%%1 != 0,dendrodat$jul15grow<-dendrodat$jul15grow+.5,dendrodat$jul15grow<-dendrodat$jul15grow-.5)
-dendrodat$aug15grow <- ifelse(dendrodat$aug15grow%%1 != 0,dendrodat$aug15grow<-dendrodat$aug15grow+.5,dendrodat$aug15grow<-dendrodat$aug15grow-.5)
-dendrodat$sep15grow <- ifelse(dendrodat$sep15grow%%1 != 0,dendrodat$sep15grow<-dendrodat$sep15grow+.5,dendrodat$sep15grow<-dendrodat$sep15grow-.5)
-dendrodat$oct15grow <- ifelse(dendrodat$oct15grow%%1 != 0,dendrodat$oct15grow<-dendrodat$oct15grow+.5,dendrodat$oct15grow<-dendrodat$oct15grow-.5)
+dendrodat$jul15grow <- ceiling(dendrodat$jul15grow); dendrodat$aug15grow <- ceiling(dendrodat$aug15grow)
+dendrodat$sep15grow <- ceiling(dendrodat$sep15grow); dendrodat$oct15grow <- ceiling(dendrodat$oct15grow)
 
 ###################2016
-dendrodat$jul16grow <- ifelse(dendrodat$jul16grow%%1 != 0,dendrodat$jul16grow<-dendrodat$jul16grow+.5,dendrodat$jul16grow<-dendrodat$jul16grow-.5)
+dendrodat$jul16grow <- ceiling(dendrodat$jul16grow)
 
 ###################2017
-dendrodat$jun17grow <- ifelse(dendrodat$jun17grow%%1 != 0,dendrodat$jun17grow<-dendrodat$jun17grow+.5,dendrodat$jun17grow<-dendrodat$jun15grow-.5)
-dendrodat$jul17grow <- ifelse(dendrodat$jul17grow%%1 != 0,dendrodat$jul17grow<-dendrodat$jul17grow+.5,dendrodat$jul17grow<-dendrodat$jul15grow-.5)
-dendrodat$aug17grow <- ifelse(dendrodat$aug17grow%%1 != 0,dendrodat$aug17grow<-dendrodat$aug17grow+.5,dendrodat$aug17grow<-dendrodat$aug15grow-.5)
-dendrodat$oct17grow <- ifelse(dendrodat$oct17grow%%1 != 0,dendrodat$oct17grow<-dendrodat$oct17grow+.5,dendrodat$oct17grow<-dendrodat$oct15grow-.5)
-dendrodat$tot17grow <- ifelse(dendrodat$tot17grow%%1 != 0,dendrodat$tot17grow<-dendrodat$tot17grow+.5,dendrodat$tot17grow<-dendrodat$tot15grow-.5)
+dendrodat$jun17grow <- ceiling(dendrodat$jun17grow); dendrodat$jul17grow <- ceiling(dendrodat$jul17grow)
+dendrodat$aug17grow <- ceiling(dendrodat$aug17grow); dendrodat$oct17grow <- ceiling(dendrodat$oct17grow)
+dendrodat$tot17grow <- ceiling(dendrodat$tot17grow); 
 
-###################totals
-dendrodat$maygrow <- ifelse(dendrodat$jun17grow%%1 != 0,dendrodat$jun17grow<-dendrodat$jun17grow+.5,dendrodat$jun17grow<-dendrodat$jun15grow-.5)
+###################totals. these are done differently because not all are 0.5 (some should be rounded up, some down to get to nearest int)
+dendrodat$maygrow<-round(dendrodat$maygrow,digits=1);dendrodat$jungrow<-round(dendrodat$jungrow,digits=1);dendrodat$julgrow<-round(dendrodat$julgrow,digits=1)
+dendrodat$auggrow<-round(dendrodat$auggrow,digits=1);dendrodat$sepgrow<-round(dendrodat$sepgrow,digits=1);dendrodat$octgrow<-round(dendrodat$octgrow,digits=1)
 
-dendrodat$jungrow <- ifelse(dendrodat$jungrow %%1 > 0.5,dendrodat$jun17grow<-dendrodat$jun17grow+.5,dendrodat$jun17grow<-dendrodat$jun15grow-.5)
+dendrodat$maygrow <- ifelse(dendrodat$maygrow%%1 >= 0.5,dendrodat$maygrow <- dendrodat$maygrow + .5, dendrodat$maygrow <- dendrodat$maygrow -.5)
+dendrodat$jungrow <- ifelse(dendrodat$jungrow%%1 >= 0.5,dendrodat$jungrow <- ceiling(dendrodat$jungrow), dendrodat$jungrow <- dendrodat$jungrow-0.3)
+dendrodat$julgrow <- ifelse(dendrodat$julgrow%%1 >= 0.5,dendrodat$julgrow <- dendrodat$julgrow + .5, dendrodat$julgrow <- dendrodat$julgrow -.5)
+dendrodat$auggrow <- 
+dendrodat$sepgrow <- 
+dendrodat$octgrow <- 
 
-dendrodat$julgrow <- rowMeans(subset(dendrodat,select=c(jul15grow,jul16grow,jul17grow)),na.rm=TRUE)
-dendrodat$auggrow <- rowMeans(subset(dendrodat,select=c(aug15grow,aug16grow,aug17grow)),na.rm=TRUE)
-dendrodat$sepgrow <- rowMeans(subset(dendrodat,select=c(sep15grow,sep16grow,sep17grow)),na.rm=TRUE)
-dendrodat$octgrow <- rowMeans(subset(dendrodat,select=c(oct15grow,oct16grow,oct17grow)),na.rm=TRUE)
+
+jungrow <- ifelse(dendrodat$jungrow%%1 >= 0.5,jungrow <- ceiling(dendrodat$jungrow), jungrow <- dendrodat$jungrow-0.3)
+
 
 #separate datasets for each species
 poplar <- dendrodat[dendrodat$spcode=='LITU',]

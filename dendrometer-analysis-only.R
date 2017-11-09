@@ -15,15 +15,16 @@
 #dominance [char]        = dominant (D), co-dominant (C), or intermediate (I) 
 #baselinedbh [num]       = DBH at date of first installation (in inches) 
 #tension [char]          = lo, hi or na -- densiometer tension. only available for trees 1-24 (24-32: na) 
-#jun15mm-sep17mm [num]   = growth in mm of trees from previous month's measurement* 
-#tot15mm-tot17mm [num]   = total growth in mm of each tree from April-October* 
+#jun15grow-sep17grow [num]   = growth in mm of trees from previous month's measurement* 
+#tot15grow-tot17grow [num]   = total growth in mm of each tree from April-October* 
 #jun15rain-oct17rain [num] = total precipitation (inches) in previous month. If more than one month passed
 #between measurements, the value was divided by the number of intervening
 #months for a monthly average. Only in dataset when there is also a measurement.
 #jun15temp-oct17temp	= average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement.
 #tot15rain-tot17rain	= total rainfall from initial band placement to last measurement
 #tot15temp-tot17temp	= average high temperature from initial band placement to last measurement
-####  *for measurements: in dataset as '999' if value is missing
+####  *for measurements: in dataset as '999' if value is missing. Also, note that the following values were rounded up from 0.5:
+####  *jul-oct15grow, jul16grow, jun-aug17grow, oct17grow, tot17grow
 
 ################################### DENDRODAT #############################################
 
@@ -56,11 +57,16 @@ septtest <- t.test(sepgrow ~ timbersale, data=dendrodat)
 octttest <- t.test(octgrow ~ timbersale, data=dendrodat)
 
 #GLM
-julglm <- glm(julgrow ~ timbersale + spcode + sitequal + site, data=dendrodat)
-summary(julglm)
-plot(julglm, which = 1) #residuals v fitted
-plot(julglm, which = 2) #q-q plot
-boxplot(julgrow ~ site, data=dendrodat)
+#family=poisson
+julglm <- glm(jul15growint ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log"))
+mayglm <- glm(may15grow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log"))
+#negative binomial
+mayglm <- glm.nb(jun16grow ~ timbersale +  aspect , data=dendrodat)
+summary(julglm )
+(sum(residuals(julglm ,type="pearson")^2))/6 #chisq over df--note that denominator is residual deviance df, will change for each model
+plot(julglm , which = 1) #residuals v fitted
+plot(julglm , which = 2) #q-q plot
+boxplot(jul15growint ~ site, data=dendrodat)
 
 #GLMM (mixed model)
 #treeid, spcode, site, aspect, sitequal, timbersale, dominance
