@@ -1,8 +1,5 @@
 #load packages
-library(glm2)
-library(lme4)
-library(ggplot2)
-library(MASS)
+library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection)
 
 #read-in and load packages
 dendrodat <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrometer-data-corrected.csv')
@@ -94,16 +91,16 @@ dendrodat$tot17grow <- ceiling(dendrodat$tot17grow);
 dendrodat$maygrow<-round(dendrodat$maygrow,digits=1);dendrodat$jungrow<-round(dendrodat$jungrow,digits=1);dendrodat$julgrow<-round(dendrodat$julgrow,digits=1)
 dendrodat$auggrow<-round(dendrodat$auggrow,digits=1);dendrodat$sepgrow<-round(dendrodat$sepgrow,digits=1);dendrodat$octgrow<-round(dendrodat$octgrow,digits=1)
 
-dendrodat$maygrow <- ifelse(dendrodat$maygrow%%1 >= 0.5,dendrodat$maygrow <- dendrodat$maygrow + .5, dendrodat$maygrow <- dendrodat$maygrow -.5)
-dendrodat$jungrow <- ifelse(dendrodat$jungrow%%1 >= 0.5,dendrodat$jungrow <- ceiling(dendrodat$jungrow), dendrodat$jungrow <- dendrodat$jungrow-0.3)
-dendrodat$julgrow <- ifelse(dendrodat$julgrow%%1 >= 0.5,dendrodat$julgrow <- dendrodat$julgrow + .5, dendrodat$julgrow <- dendrodat$julgrow -.5)
-dendrodat$auggrow <- 
-dendrodat$sepgrow <- 
-dendrodat$octgrow <- 
-
-
-jungrow <- ifelse(dendrodat$jungrow%%1 >= 0.5,jungrow <- ceiling(dendrodat$jungrow), jungrow <- dendrodat$jungrow-0.3)
-
+dendrodat2 <- dendrodat #new dataframe
+#rounding to nearest integer. ##########PROBLEM: 0.3 rounds down to 0.
+dendrodat2$maygrow <- ifelse(dendrodat$maygrow%%1 >= 0.5,dendrodat2$maygrow <- ceiling(dendrodat$maygrow), dendrodat2$maygrow <- floor(dendrodat$maygrow))
+dendrodat2$jungrow <- ifelse(dendrodat$jungrow%%1 >= 0.5,dendrodat2$jungrow <- ceiling(dendrodat$jungrow), dendrodat2$jungrow <- floor(dendrodat$jungrow))
+dendrodat2$julgrow <- ifelse(dendrodat$julgrow%%1 >= 0.5,dendrodat2$julgrow <- ceiling(dendrodat$julgrow), dendrodat2$julgrow <- floor(dendrodat$julgrow))
+dendrodat2$auggrow <- ifelse(dendrodat$auggrow%%1 >= 0.5,dendrodat2$auggrow <- ceiling(dendrodat$auggrow), dendrodat2$auggrow <- floor(dendrodat$auggrow))
+dendrodat2$sepgrow <- ifelse(dendrodat$sepgrow%%1 >= 0.5,dendrodat2$sepgrow <- ceiling(dendrodat$sepgrow), dendrodat2$sepgrow <- floor(dendrodat$sepgrow))
+dendrodat2$octgrow <- ifelse(dendrodat$octgrow%%1 >= 0.5,dendrodat2$octgrow <- ceiling(dendrodat$octgrow), dendrodat2$octgrow <- floor(dendrodat$octgrow))
+dendrodat$maygrowr <- dendrodat2$maygrow; dendrodat$jungrowr <- dendrodat2$jungrow; dendrodat$julgrowr <- dendrodat2$julgrow; dendrodat$auggrowr <- dendrodat2$auggrow
+dendrodat$sepgrowr <- dendrodat2$sepgrow; dendrodat$octgrowr <- dendrodat2$octgrow
 
 #separate datasets for each species
 poplar <- dendrodat[dendrodat$spcode=='LITU',]

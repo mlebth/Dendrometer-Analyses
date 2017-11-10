@@ -28,51 +28,76 @@
 
 ################################### DENDRODAT #############################################
 
-################## visualizations
+################## visualizations ##################
 #plot monthly average growth
-boxplot(dendrodat$maygrow,dendrodat$jungrow,dendrodat$julgrow,dendrodat$auggrow,dendrodat$sepgrow,dendrodat$octgrow) 
+boxplot(dendrodat$maygrow,dendrodat$jungrow,dendrodat$julgrow,dendrodat$auggrow,dendrodat$sepgrow,dendrodat$octgrow,main="allmonths") 
 #outliers present all but jun
-plot(dendrodat$maygrow)
-plot(dendrodat$jungrow)
-plot(dendrodat$julgrow)
-plot(dendrodat$auggrow)
-plot(dendrodat$sepgrow)
-plot(dendrodat$octgrow)   
+plot(dendrodat$maygrow,main="maygrow");plot(dendrodat$jungrow,main="jungrow");plot(dendrodat$julgrow,main="julgrow");plot(dendrodat$auggrow,main="auggrow")
+plot(dendrodat$sepgrow,main="sepgrow");plot(dendrodat$octgrow,main="octgrow")   
 #q-q plots
-qqnorm(dendrodat$maygrow) #right skew
-qqnorm(dendrodat$jungrow) #light-tailed
-qqnorm(dendrodat$julgrow) #right skew
-qqnorm(dendrodat$auggrow) #right skew
-qqnorm(dendrodat$sepgrow) #many 0's
-qqnorm(dendrodat$octgrow) #many 0's
+qqnorm(dendrodat$maygrow,main="maygrow");qqline(dendrodat$maygrow,main="maygrow")  #right skew
+qqnorm(dendrodat$jungrow,main="jungrow");qqline(dendrodat$jungrow,main="jungrow")  #light-tailed
+qqnorm(dendrodat$julgrow,main="julgrow");qqline(dendrodat$julgrow,main="julgrow")  #right skew
+qqnorm(dendrodat$auggrow,main="auggrow");qqline(dendrodat$auggrow,main="auggrow")  #right skew
+qqnorm(dendrodat$sepgrow,main="sepgrow");qqline(dendrodat$sepgrow,main="sepgrow")  #many 0's
+qqnorm(dendrodat$octgrow,main="octgrow");qqline(dendrodat$octgrow,main="octgrow")  #many 0's
 
-###################models
+#log transform--adding one to deal with 0's--0 transforms to 0
+dendrodat$logmaygrow<-log(dendrodat$maygrow+1);dendrodat$logjungrow<-log(dendrodat$jungrow+1);dendrodat$logjulgrow<-log(dendrodat$julgrow+1)
+dendrodat$logauggrow<-log(dendrodat$auggrow+1);dendrodat$logsepgrow<-log(dendrodat$sepgrow+1);dendrodat$logoctgrow<-log(dendrodat$octgrow+1)
+#outliers present all but jun
+plot(dendrodat$logmaygrow,main="logmaygrow");plot(dendrodat$logjungrow,main="logjungrow");plot(dendrodat$logjulgrow,main="logjulgrow")
+plot(dendrodat$logauggrow,main="logauggrow");plot(dendrodat$logsepgrow,main="logsepgrow");plot(dendrodat$logoctgrow,main="logoctgrow")
+#q-q plots
+qqnorm(dendrodat$logmaygrow,main="logmaygrow");qqline(dendrodat$logmaygrow,main="logmaygrow") #better than untransformed
+qqnorm(dendrodat$logjungrow,main="logjungrow");qqline(dendrodat$logjungrow,main="logjungrow") #worse than untransformed
+qqnorm(dendrodat$logjulgrow,main="logjulgrow");qqline(dendrodat$logjulgrow,main="logjulgrow") #better than untransformed  
+qqnorm(dendrodat$logauggrow,main="logauggrow");qqline(dendrodat$logauggrow,main="logauggrow") #better than untransformed
+qqnorm(dendrodat$logsepgrow,main="logsepgrow");qqline(dendrodat$logsepgrow,main="logsepgrow") #slightly better than untransformed
+qqnorm(dendrodat$logoctgrow,main="logoctgrow");qqline(dendrodat$logoctgrow,main="logoctgrow") #better than untransformed
+
+##########sqrt transform--best transformations
+dendrodat$sqrtmaygrow<-sqrt(dendrodat$maygrow);dendrodat$sqrtjungrow<-sqrt(dendrodat$jungrow);dendrodat$sqrtjulgrow<-sqrt(dendrodat$julgrow)
+dendrodat$sqrtauggrow<-sqrt(dendrodat$auggrow);dendrodat$sqrtsepgrow<-sqrt(dendrodat$sepgrow);dendrodat$sqrtoctgrow<-sqrt(dendrodat$octgrow)
+#outliers present all but jun
+plot(dendrodat$sqrtmaygrow,main="sqrtmaygrow");plot(dendrodat$sqrtjungrow,main="sqrtjungrow");plot(dendrodat$sqrtjulgrow,main="sqrtjulgrow")
+plot(dendrodat$sqrtauggrow,main="sqrtauggrow");plot(dendrodat$sqrtsepgrow,main="sqrtsepgrow");plot(dendrodat$sqrtoctgrow,main="sqrtoctgrow")
+#q-q plots
+qqnorm(dendrodat$sqrtmaygrow,main="sqrtmaygrow");qqline(dendrodat$sqrtmaygrow,main="sqrtmaygrow") #better than log
+qqnorm(dendrodat$sqrtjungrow,main="sqrtjungrow");qqline(dendrodat$sqrtjungrow,main="sqrtjungrow") #different shape than untransformed, maybe slightly better
+qqnorm(dendrodat$sqrtjulgrow,main="sqrtjulgrow");qqline(dendrodat$sqrtjulgrow,main="sqrtjulgrow") #slightly better than log 
+qqnorm(dendrodat$sqrtauggrow,main="sqrtauggrow");qqline(dendrodat$sqrtauggrow,main="sqrtauggrow") #similar to log
+qqnorm(dendrodat$sqrtsepgrow,main="sqrtsepgrow");qqline(dendrodat$sqrtsepgrow,main="sqrtsepgrow") #better than log
+qqnorm(dendrodat$sqrtoctgrow,main="sqrtoctgrow");qqline(dendrodat$sqrtoctgrow,main="sqrtoctgrow") #better than log
+
 #t-test for each month by timbersale
 #these group growth rates of all species by month
-mayttest <- t.test(maygrow ~ timbersale, data=dendrodat)
-junttest <- t.test(jungrow ~ timbersale, data=dendrodat)
-julttest <- t.test(julgrow ~ timbersale, data=dendrodat)
-augttest <- t.test(auggrow ~ timbersale, data=dendrodat)
-septtest <- t.test(sepgrow ~ timbersale, data=dendrodat)
-octttest <- t.test(octgrow ~ timbersale, data=dendrodat)
+t.test(sqrtmaygrow ~ timbersale, data=dendrodat);t.test(sqrtjungrow ~ timbersale, data=dendrodat);t.test(sqrtjulgrow ~ timbersale, data=dendrodat)
+t.test(sqrtauggrow ~ timbersale, data=dendrodat);t.test(sqrtsepgrow ~ timbersale, data=dendrodat);t.test(sqrtoctgrow ~ timbersale, data=dendrodat)
 
-#GLM
-#family=poisson
-julglm <- glm(jul15growint ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log"))
-mayglm <- glm(may15grow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log"))
-#negative binomial
-mayglm <- glm.nb(jun16grow ~ timbersale +  aspect , data=dendrodat)
-summary(julglm )
-(sum(residuals(julglm ,type="pearson")^2))/6 #chisq over df--note that denominator is residual deviance df, will change for each model
-plot(julglm , which = 1) #residuals v fitted
-plot(julglm , which = 2) #q-q plot
-boxplot(jul15growint ~ site, data=dendrodat)
+###########GLM
+#gaussian
+mayglm <- glm(sqrtmaygrow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp , data=dendrodat)
+#summary statistics
+summary(mayglm )
+(sum(residuals(mayglm,type="pearson")^2))/25 #chisq over df--note that denominator is residual deviance df, will change for each model
+hoslem.test(dendrodat$sqrtmaygrow,fitted(mayglm)) #goodness of fit (want p>0.05, no diff between model and observed data--not great for small sample sizes)
+plot(mayglm, which = 1,main="residuals v fitted glm") 
+qqnorm(resid(mayglm));qqline(resid(mayglm),main="q-q plot glm") 
+boxplot(sqrtmaygrow ~ site, data=dendrodat,main="sqrtmaygrow~site")
 
-#GLMM (mixed model)
+##########GLMM (mixed model)
 #treeid, spcode, site, aspect, sitequal, timbersale, dominance
-julmixed <- lmer(julgrow ~ timbersale + spcode + sitequal + (1|site), data=dendrodat)
-summary(julmixed)
-plot(julmixed)
-qqnorm(resid(julmixed))
-qqline(resid(julmixed)) 
+maymixed <- lmer(sqrtmaygrow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp + (1|site), data=dendrodat)
+summary(maymixed)
+(sum(residuals(maymixed,type="pearson")^2))/25 #chisq over df--note that denominator is residual deviance df, will change for each model
+plot(maymixed,main="residuals v fitted mixed")
+qqnorm(resid(maymixed));qqline(resid(maymixed),main="q-q plot mixed") 
 
+
+
+
+#################extraneous code snippets
+#julglm <- glm(julgrowr ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log")) #poisson glm
+#julglm <- glm.nb(julgrowr ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat)                         #negbin  glm
+#plot(mayglm, which = 2,main="q-q plot")                                          #alternate way to plot q-q plots that identifies outliers
