@@ -76,19 +76,21 @@ t.test(sqrtmaygrow ~ timbersale, data=dendrodat);t.test(sqrtjungrow ~ timbersale
 t.test(sqrtauggrow ~ timbersale, data=dendrodat);t.test(sqrtsepgrow ~ timbersale, data=dendrodat);t.test(sqrtoctgrow ~ timbersale, data=dendrodat)
 
 ###########GLM
+#spcode, site, aspect, sitequal, timbersale, dominance, baselinedbh, rain, temp
+
+junglm <- glm(sqrtjungrow ~ timbersale + sitequal + aspect + baselinedbh + junrain + juntemp + baselinedbh*junrain + baselinedbh*juntemp + junrain*juntemp, data=dendrodat)
+
 #gaussian
-mayglm <- glm(sqrtmaygrow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp , data=dendrodat)
-#summary statistics
-summary(mayglm )
-(sum(residuals(mayglm,type="pearson")^2))/25 #chisq over df--note that denominator is residual deviance df, will change for each model
-hoslem.test(dendrodat$sqrtmaygrow,fitted(mayglm)) #goodness of fit (want p>0.05, no diff between model and observed data--not great for small sample sizes)
-plot(mayglm, which = 1,main="residuals v fitted glm") 
-qqnorm(resid(mayglm));qqline(resid(mayglm),main="q-q plot glm") 
-boxplot(sqrtmaygrow ~ site, data=dendrodat,main="sqrtmaygrow~site")
+junglm <- glm(sqrtjungrow ~ timbersale + sitequal + aspect + baselinedbh + junrain + juntemp + baselinedbh*juntemp , data=dendrodat)
+summary(junglm)
+plot(junglm, which = 1,main="residuals v fitted glm") 
+qqnorm(resid(junglm));qqline(resid(junglm),main="q-q plot glm") 
+boxplot(sqrtjungrow ~ site, data=dendrodat,main="sqrtjungrow~site")
+
 
 ##########GLMM (mixed model)
 #treeid, spcode, site, aspect, sitequal, timbersale, dominance
-maymixed <- lmer(sqrtmaygrow ~ timbersale + sitequal + baselinedbh + mayrain + maytemp + (1|site), data=dendrodat)
+maymixed <- lmer(sqrtmaygrow ~ timbersale + sitequal + mayrain + maytemp + (1|site), data=dendrodat)
 summary(maymixed)
 (sum(residuals(maymixed,type="pearson")^2))/25 #chisq over df--note that denominator is residual deviance df, will change for each model
 plot(maymixed,main="residuals v fitted mixed")
@@ -101,3 +103,4 @@ qqnorm(resid(maymixed));qqline(resid(maymixed),main="q-q plot mixed")
 #julglm <- glm(julgrowr ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat,family=poisson(link="log")) #poisson glm
 #julglm <- glm.nb(julgrowr ~ timbersale + sitequal + baselinedbh + mayrain + maytemp, data=dendrodat)                         #negbin  glm
 #plot(mayglm, which = 2,main="q-q plot")                                          #alternate way to plot q-q plots that identifies outliers
+#hoslem.test(dendrodat$sqrtjungrow,fitted(junglm)) #goodness of fit (want p>0.05, no diff between model and observed data--not great for small sample sizes)
