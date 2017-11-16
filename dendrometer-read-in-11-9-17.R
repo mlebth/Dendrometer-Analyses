@@ -1,5 +1,6 @@
 #load packages
 library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car);library(emmeans);library(AICcmodavg)
+library(gplots);library(corrplot)
 
 #read-in 
 dendrodat <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrometer-data-corrected.csv')
@@ -43,15 +44,41 @@ dendrodat[dendrodat==999] <- NA
 #tot15temp-tot17temp	 = average high temperature from initial band placement to last measurement
 ####  *for measurements: in dataset as '999' if value is missing
 
-#exploratory
-# table(dendrodat$spcode,dendrodat$site) #all sp occur in only 1 or 2 sites
-# table(dendrodat$spcode,dendrodat$sitequal) #all but PIST occur in only 1 or 2 site quals
-# table(dendrodat$site,dendrodat$sitequal) #B06B: sitequal 1 only; B10B and C03x: each site qual represented
-# table(dendrodat$spcode,dendrodat$timbersale) #at least one of each species in each level of timbersale
-# table(dendrodat$site,dendrodat$timbersale) #exactly even number of trees in each timbersale level per plot
-# table(dendrodat$site,dendrodat$aspect) #B06B and C03x: N; B10B: S
-# table(dendrodat$spcode,dendrodat$dominance) #most trees are co-dominant
-# table(dendrodat$tension,dendrodat$baselinedbh) #low tension dendrometers were used below 21.1 in DBH
+#exploratory 
+#spcode, site, aspect, sitequal, timbersale, dbh, ba
+# spvsite<-table(dendrodat$spcode,dendrodat$site) #all sp occur in only 1 or 2 sites
+# spvsitequal<-table(dendrodat$spcode,dendrodat$sitequal) #all but PIST occur in only 1 or 2 site quals
+# spvtimbersale<-table(dendrodat$spcode,dendrodat$timbersale) #at least one of each species in each level of timbersale
+# spvaspect<-table(dendrodat$spcode,dendrodat$aspect) #at least one of each species in each level of timbersale
+# sitevsitequal<-table(dendrodat$site,dendrodat$sitequal) #B06B: sitequal 1 only; B10B and C03x: each site qual represented
+# sitevtimbersale<-table(dendrodat$site,dendrodat$timbersale) #exactly even number of trees in each timbersale level per plot
+# sitevaspect<-table(dendrodat$site,dendrodat$aspect) #B06B and C03x: N; B10B: S
+# spvdom<-table(dendrodat$spcode,dendrodat$dominance) #most trees are co-dominant
+# tensionvdbh<-table(dendrodat$tension,dendrodat$baselinedbh) #low tension dendrometers were used below 21.1 in DBH
+# qualvsale<-table(dendrodat$sitequal,dendrodat$timbersale) #low tension dendrometers were used below 21.1 in DBH
+#tried chisq, sample sizes are too small/too many 0's
+fspvsite<-fisher.test(spvsite) #p=0.001         
+fspvsitequal<-fisher.test(spvsitequal)#p=0.02
+fspvtimbersale<-fisher.test(spvtimbersale) #p=1       #equal numbers in each cat
+fspvaspect<-fisher.test(spvaspect) #p=0.001
+fsitevsitequal<-fisher.test(sitevsitequal) #p=0.02
+fsitevtimbersale<-fisher.test(sitevtimbersale) #p=1   #equal numbers in each cat
+fsitevaspect<-fisher.test(sitevaspect) #p=0.0004
+fqualvsale<-fisher.test(qualvsale) #p=0.6
+#spcode, site, aspect, sitequal, timbersale, dbh, ba
+bacode<-lm(baselineBA~spcode,data=dendrodat) #p=0.9
+basite<-lm(baselineBA~site,data=dendrodat) #p=0.9
+baasp<-lm(baselineBA~aspect,data=dendrodat) #p=0.8
+baqual<-lm(baselineBA~sitequal,data=dendrodat) #p=0.8
+basale<-lm(baselineBA~timbersale,data=dendrodat) #p=0.00006
+badbh<-lm(baselineBA~baselinedbh,data=dendrodat) #p=0.5
+#spcode, site, aspect, sitequal, timbersale, dbh, ba
+dbhcode<-lm(baselinedbh~spcode,data=dendrodat) #p=0.6
+dbhsite<-lm(baselinedbh~site,data=dendrodat) #p=0.2
+dbhasp<-lm(baselinedbh~aspect,data=dendrodat) #p=0.09
+dbhqual<-lm(baselinedbh~sitequal,data=dendrodat) #p=0.2
+dbhsale<-lm(baselinedbh~timbersale,data=dendrodat) #p=0.7
+dbhba<-lm(baselinedbh~baselineBA,data=dendrodat) #p=0.5
 
 #growth rates by month only (mean of all years per individual)
 dendrodat$maygrow <- rowMeans(subset(dendrodat,select=c(may16grow,may17grow)),na.rm=TRUE)

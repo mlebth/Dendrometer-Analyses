@@ -65,6 +65,7 @@ fullcat<-lm(sqrtmaygrow ~ timbersale + sitequal + site + aspect + baselinedbh + 
 summary(fullcont);AICc(fullcont);anova(fullcont)
 summary(fullcat);AICc(fullcat);anova(fullcat)
 
+##sig corr: baselineBA-timbersale,site-aspect,site-sitequal,sp-aspect,sp-sitequal,sp-site
 #gaussian--linear model
 maylm <- lm(sqrtmaygrow ~ timbersale + sitequal, data=dendrodat)
 junlm <- lm(sqrtjungrow ~ timbersale + sitequal + baselinedbh + junrain + juntemp + baselinedbh*juntemp, data=dendrodat)
@@ -83,8 +84,15 @@ lsmeans(junlm,list(pairwise ~ timbersale, pairwise ~ sitequal))
 
 plot(octlm, which = 1,main="residuals v fitted glm") 
 qqnorm(resid(octlm));qqline(resid(octlm),main="q-q plot glm") 
-boxplot(sqrtoctgrow ~ timbersale, data=dendrodat,main="sqrtsepgrow~timbersale")
+plot(sqrtmaygrow ~ timbersale, data=dendrodat,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+plot(sqrtjungrow ~ timbersale, data=dendrodat,xlab="Timbersale",ylab="June growth",main="June growth~timbersale")
+plot(sqrtjulgrow ~ timbersale, data=dendrodat,xlab="Timbersale",ylab="July growth",main="July growth~timbersale")
+plot(sqrtauggrow ~ timbersale, data=dendrodat,xlab="Timbersale",ylab="August growth",main="August growth~timbersale")
+plot(sqrtoctgrow ~ timbersale, data=dendrodat,xlab="Timbersale",ylab="October growth",main="October growth~timbersale")
 
+plot(sqrtmaygrow ~ sitequal, data=dendrodat,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(sqrtjungrow ~ sitequal, data=dendrodat,xlab="Site quality",ylab="June growth",main="June growth~site quality")
+plot(sqrtjulgrow ~ sitequal, data=dendrodat,xlab="Site quality",ylab="July growth",main="July growth~site quality")
 #not using site as random for now
 ##########GLMM (mixed model)
 #treeid, spcode, site, aspect, sitequal, timbersale, dominance
