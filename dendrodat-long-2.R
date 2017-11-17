@@ -5,41 +5,33 @@ library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelec
 dendrodatl <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrodat-long.csv')
 #summary(dendrodatl)
 
-#recoding timbersale and site to be numeric for mat
-dendrodatmat<-dendrodatl
-dendrodatmat$site   <- revalue(dendrodatl$site,   c("B10B"=1, "B06B"=2, "C03x"=3));dendrodatmat$timbersale <- revalue(dendrodatl$timbersale, c("N"=1, "Y"=2))
-dendrodatmat$aspect <- revalue(dendrodatl$aspect, c("N"=1, "S"=2));                dendrodatmat$dominance  <- revalue(dendrodatl$dominance,  c("I"=1, "C"=2, "D"=3))
-dendrodatmat$month  <- revalue(dendrodatl$month,  c("may"=5, "jun"=6, "jul"=7, "aug"=8, "sep"=9, "oct"=10))     
-dendrodatmat$growth[is.na(dendrodatmat$growth)] <- 999; dendrodatmat$rain[is.na(dendrodatmat$rain)] <- 999; dendrodatmat$temp[is.na(dendrodatmat$temp)] <- 999
-
 #making numeric vars factors as needed
 dendrodatl$treeid   <- factor(dendrodatl$treeid)
 dendrodatl$spnum    <- factor(dendrodatl$spnum)
 dendrodatl$sitequal <- factor(dendrodatl$sitequal)
 dendrodatl$year     <- factor(dendrodatl$year)
 
-mat1 <- matrix(999,nrow=576,ncol=20,dimnames=list(NULL, c("treeid","spnum","site","aspect","sitequal","timbersale","dominance","baselinestandBA","baselineinddbh","year"
-                                                      ,"month","growth","rain","temp","olddbh","oldBA","newdbh","newBA","mardbh","marba")))
-#1-treeid, 2-spnum, 3-site, 4-aspect, 5-sitequal, 6-timbersale, 7-dominance, 8-baselinestandBA, 9-baselineinddbh, 10-year
-#11-month, 12-growth, 13-rain, 14-temp, 15-olddbh, 16-oldBA, 17-newdbh, 18-newBA, 19-mardbh, 20-marba
-mat1[,1] <-dendrodatmat$treeid;     mat1[,2]<-dendrodatmat$spnum;     mat1[,3]<-dendrodatmat$site;            mat1[,4]<-dendrodatmat$aspect;         mat1[,5]<-dendrodatmat$sitequal
-mat1[,6] <-dendrodatmat$timbersale; mat1[,7]<-dendrodatmat$dominance; mat1[,8]<-dendrodatmat$baselinestandBA; mat1[,9]<-dendrodatmat$baselineinddbh; mat1[,10]<-dendrodatmat$year
-mat1[,11]<-dendrodatmat$month;      mat1[,12]<-dendrodatmat$growth;   mat1[,13]<-dendrodatmat$rain;           mat1[,14]<-dendrodatmat$temp
+dendrol<-dendrodatl 
 
-#started to write a loop, it's unecessary (but keeping the code just in case)
-#for (i in 1:dim(mat1)[1]) {                  #down
-#  for (j in 1:dim(mat1)[2]){                 #over
-    mat1[,15] <- if(((mat1[,10]=2015) & (mat1[,11]=5))|((mat1[,10]=2015) & (mat1[,11]=6))|((mat1[,10]=2015) & (mat1[,11]=7))|((mat1[,10]=2016) & (mat1[,11]=5))|
-                    ((mat1[,10]=2017) & (mat1[,11]=5))){dendrodatmat$baselineinddbh}    #setting start columns
-    mat1[,16] <- ifelse((mat1[,15]!=999),(3.14159*((mat1[,15]/2)^2)),999)       #calculating oldBA from olddbh 
-    mat1[,17] <- ifelse((mat1[,12]!=999),(mat1[,12]+mat1[,15])      ,999)       #calculating newdbh
-    mat1[,18] <- ifelse((mat1[,17]!=999),(3.14159*((mat1[,17]/2)^2)),999)       #calculating newBA from newdbh
-    mat1[,19] <- ifelse((mat1[,15]!=999),(mat1[,17]-mat1[,15]),      999)       #calculating mardbh
-    mat1[,20] <- ifelse((mat1[,16]!=999),(mat1[,18]-mat1[,16]),      999)       #calculating marba
-#  }
-#}
-    
-mat1[70:90,9:20]
+dendrol$olddbh<-ifelse(((dendrol$year=='2015')&(dendrol$month=='may'))|((dendrol$year=='2015')&(dendrol$month=='jun'))|((dendrol$year=='2015')
+                       &(dendrol$month=='jul'))|((dendrol$year=='2016')&(dendrol$month=='may'))|((dendrol$year=='2017')&(dendrol$month=='may'))
+                       ,dendrol$baselineinddbh)    #setting start columns
+dendrol$oldBA  <- (3.14159*((dendrol$olddbh/2)^2))    #calculating oldBA from olddbh 
+dendrol$newdbh <- (dendrol$growth+dendrol$olddbh)     #calculating newdbh
+dendrol$newBA  <- (3.14159*((dendrol$newdbh/2)^2))    #calculating newBA from newdbh
+dendrol$mardbh <- (dendrol$newdbh-dendrol$olddbh)     #calculating mardbh
+dendrol$marba  <- (dendrol$newBA-dendrol$oldBA)       #calculating marba
+
+#1-treeid, 2-spnum, 3-spname, 4-spcode, 5-site, 6-aspect, 7-sitequal,8-timbersale, 9-dominance, 10-baselinestandBA, 11-baselineinddbh, 12-tension, 13-year
+#14-month, 15-growth, 16-rain, 17-temp, 18-olddbh, 19-oldBA, 20-newdbh, 21-newBA, 22-mardbh, 23-marba
+
+for (treeid in 1:32){
+  if it's later, olddbh=prevolddbh, else '
+  add olddbh to newdbh
+}
+dendrol[560:576,11:23]
+
+write.csv(dendrol,'F:/FIG/Dendrometer/Dendrometer Analyses/dendrol.csv')
 
 ###############################Variables:
 #treeid [char]           = individual tree id 

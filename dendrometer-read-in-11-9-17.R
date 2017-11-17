@@ -18,7 +18,6 @@ dendrodat$sitequal <- factor(dendrodat$sitequal)
 #factor(dendrodat$spnum)
 #factor(dendrodat$sitequal)
 
-
 #taking out 99's
 dendrodat[dendrodat==999] <- NA
 
