@@ -56,28 +56,28 @@ dendrodat[dendrodat==999] <- NA
 # tensionvdbh<-table(dendrodat$tension,dendrodat$baselinedbh) #low tension dendrometers were used below 21.1 in DBH
 # qualvsale<-table(dendrodat$sitequal,dendrodat$timbersale) #low tension dendrometers were used below 21.1 in DBH
 #tried chisq, sample sizes are too small/too many 0's
-fspvsite<-fisher.test(spvsite) #p=0.001         
-fspvsitequal<-fisher.test(spvsitequal)#p=0.02
-fspvtimbersale<-fisher.test(spvtimbersale) #p=1       #equal numbers in each cat
-fspvaspect<-fisher.test(spvaspect) #p=0.001
-fsitevsitequal<-fisher.test(sitevsitequal) #p=0.02
-fsitevtimbersale<-fisher.test(sitevtimbersale) #p=1   #equal numbers in each cat
-fsitevaspect<-fisher.test(sitevaspect) #p=0.0004
-fqualvsale<-fisher.test(qualvsale) #p=0.6
+# fspvsite<-fisher.test(spvsite) #p=0.001         
+# fspvsitequal<-fisher.test(spvsitequal)#p=0.02
+# fspvtimbersale<-fisher.test(spvtimbersale) #p=1       #equal numbers in each cat
+# fspvaspect<-fisher.test(spvaspect) #p=0.001
+# fsitevsitequal<-fisher.test(sitevsitequal) #p=0.02
+# fsitevtimbersale<-fisher.test(sitevtimbersale) #p=1   #equal numbers in each cat
+# fsitevaspect<-fisher.test(sitevaspect) #p=0.0004
+# fqualvsale<-fisher.test(qualvsale) #p=0.6
 #spcode, site, aspect, sitequal, timbersale, dbh, ba
-bacode<-lm(baselineBA~spcode,data=dendrodat) #p=0.9
-basite<-lm(baselineBA~site,data=dendrodat) #p=0.9
-baasp<-lm(baselineBA~aspect,data=dendrodat) #p=0.8
-baqual<-lm(baselineBA~sitequal,data=dendrodat) #p=0.8
-basale<-lm(baselineBA~timbersale,data=dendrodat) #p=0.00006
-badbh<-lm(baselineBA~baselinedbh,data=dendrodat) #p=0.5
+# bacode<-lm(baselineBA~spcode,data=dendrodat) #p=0.9
+# basite<-lm(baselineBA~site,data=dendrodat) #p=0.9
+# baasp<-lm(baselineBA~aspect,data=dendrodat) #p=0.8
+# baqual<-lm(baselineBA~sitequal,data=dendrodat) #p=0.8
+# basale<-lm(baselineBA~timbersale,data=dendrodat) #p=0.00006
+# badbh<-lm(baselineBA~baselinedbh,data=dendrodat) #p=0.5
 #spcode, site, aspect, sitequal, timbersale, dbh, ba
-dbhcode<-lm(baselinedbh~spcode,data=dendrodat) #p=0.6
-dbhsite<-lm(baselinedbh~site,data=dendrodat) #p=0.2
-dbhasp<-lm(baselinedbh~aspect,data=dendrodat) #p=0.09
-dbhqual<-lm(baselinedbh~sitequal,data=dendrodat) #p=0.2
-dbhsale<-lm(baselinedbh~timbersale,data=dendrodat) #p=0.7
-dbhba<-lm(baselinedbh~baselineBA,data=dendrodat) #p=0.5
+# dbhcode<-lm(baselinedbh~spcode,data=dendrodat) #p=0.6
+# dbhsite<-lm(baselinedbh~site,data=dendrodat) #p=0.2
+# dbhasp<-lm(baselinedbh~aspect,data=dendrodat) #p=0.09
+# dbhqual<-lm(baselinedbh~sitequal,data=dendrodat) #p=0.2
+# dbhsale<-lm(baselinedbh~timbersale,data=dendrodat) #p=0.7
+# dbhba<-lm(baselinedbh~baselineBA,data=dendrodat) #p=0.5
 
 #growth rates by month only (mean of all years per individual)
 dendrodat$maygrow <- rowMeans(subset(dendrodat,select=c(may16grow,may17grow)),na.rm=TRUE)
