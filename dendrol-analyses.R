@@ -1,11 +1,12 @@
 #load packages
 library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car);library(emmeans);library(AICcmodavg)
-library(PerformanceAnalytics);library(Hmisc)
+library(PerformanceAnalytics);library(Hmisc);library(nlme)
 
 #read-in 
-dendrol <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrol-2.csv')
+dendrol <- read.csv('F:/FIG/Dendrometer/Dendrometer Analyses/dendrol-3.csv')
 #summary(dendrol)
 
+dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
 #making numeric vars factors as needed
 dendrol$treeid <- factor(dendrol$treeid)
 dendrol$year <- factor(dendrol$year)
@@ -32,12 +33,15 @@ dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible
 #tension [char]          = lo, hi or na -- densiometer tension. only available for trees 1-24 (24-32: na) 
 #year [char]             = year 
 #month [char]            = month 
-#growth [num]            = growth (mm) for the month. Where more than one month elapsed between measurements, data were normalized to reflect monthly growth by dividing the number by months since last measurement
 #rain                    = total rainfall from initial band placement to last measurement
-#temp                    = average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement.
-#olddbh, oldBA           = previous dbh and basal area (individual)
+#temp                    = average high temperature (F) in the previous month(s). Only in dataset when there is also a measurement. 
+#growth [num]            = growth (mm) for the month. Where more than one month elapsed between measurements, data were normalized to reflect monthly growth by dividing the number by months since last measurement
+#prevmeas                = dbh at previous measurement*
+#olddbh, oldBA           = previous dbh and basal area (individual)*
 #newdbh, newBA           = new dbh and basal area (individual)
 #mardbh, marBA           = marginal growth in dbh and BA
+# * in 2015, some trees were measured 2 months apart. in these instances, 'growth' is first added to 'prevmeas' to obtain a more accurate estimate of 
+#   old dbh and a more accurate marginal dbh.
 
 #exploratory 
 # predictor: spcode, site, aspect, sitequal, timbersale, dominance
@@ -81,8 +85,7 @@ dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible
 # related:sp-site, sp-qual, sp-aspect, sp-ba, site-ba, site-qual, site-aspect,qual-sale, site-dom, qual-dom, ba-dom, ba-sale, rain-temp
 
 ################## visualizations ##################
-#plot monthly average growth
-plot(dendrol$sqmarba~dendrol$month,main="allmonths",ylab="Growth in mm", xlab="Month",las=2)
+plot(dendrol$marba~dendrol$month,xlab="month",ylab=" marginal BA",main="marginal growth (BA) in each month")
 ####SQRT transformation is best for normalization of data
 plot(dendrol$marba,main="marba")
 plot(dendrol$sqmarba,main="sqmarba")
@@ -92,32 +95,42 @@ qqnorm(dendrol$marba,main="marba");qqline(dendrol$marba,main="marba")
 qqnorm(dendrol$sqmarba,main="sqmarba");qqline(dendrol$sqmarba,main="sqmarba") 
 qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba") #log is best
 
-###########GLM
-# predictor: spcode, site, aspect, sitequal, timbersale, dominance, baselinestandBA, year, month, rain, temp
+##########GLMM (mixed model)
+# predictor: treeid,spcode, site, aspect, sitequal, timbersale, dominance, year, month, baselinestandBA, rain, temp
 # response:  growth, marBA
 
-##sig corr: baselineBA-timbersale,site-aspect,site-sitequal,sp-aspect,sp-sitequal,sp-site
-#gaussian--linear model
-maylm <- lm(sqrtmaygrow ~ timbersale + sitequal, data=dendrol)
-Anova(fullcont,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
-AICc(fullcont)
-summary(fullcont) #from this, get: beta/se/p for continuous vars, R2
-(sum(residuals(fullcont,type="pearson")^2))/347 # chisq over df--note that denominator is residual deviance df, will change for each model
-lsmeans(fullcont,list(pairwise ~ timbersale, pairwise ~ sitequal))
+# related:sp-site, sp-qual, sp-aspect, sp-ba, site-ba, site-qual, site-aspect,qual-sale, site-dom, qual-dom, ba-dom, ba-sale, rain-temp
+  #modlme  <- lme (logmarba ~ spcode + aspect + sitequal + timbersale + dominance + month + year + baselineinddbh + baselinestandBA + rain + temp + baselinestandBA*rain*temp, random=list(~1|site/aspect/treeid), data=dendrol, na.action=na.exclude)
+#Error in MEEM(object, conLin, control$niterEM) : NAs in foreign function call (arg 2)
+#indicates numerical instability, consider re-scaling predictor vars. switching to lmer
+
+#centering and scaling continuous variables
+dendrol$baselinestandBAs<-scale(dendrol$baselinestandBA,center=TRUE, scale=TRUE)
+dendrol$rains<-scale(dendrol$rain,center=TRUE, scale=TRUE)
+dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
+
+
+modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains + temps +
+                  baselinestandBAs*rains*temps + (1|site), data=dendrol) 
+#fixed-effect model matrix is rank deficient so dropping 15 columns / coefficients
+
+modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year +  (1|site), data=dendrol) 
+
+modlmer <- lme(logmarba ~ treeid , data=dendrol,na.action = na.omit) 
+
+Anova(modlmer,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
+summary(modlmer);AIC(modlmer) #from this, get: beta/se/p for continuous vars, R2
+(sum(residuals(modlmer,type="pearson")^2))/375 #chisq over df--note that denominator is residual deviance df, will change for each model
+lsmeans(modlmer,list(pairwise ~ timbersale, pairwise ~ sitequal))
 #lsmeans: gives beta (lsmean), se, df, lovercl and upper cl (must manually back-transform)
 #ignore pairwise, still need to figure that out (these are incorrect estimates)
 
-plot(octlm, which = 1,main="residuals v fitted glm") 
-qqnorm(resid(octlm));qqline(resid(octlm),main="q-q plot glm") 
-plot(sqrtmaygrow ~ timbersale, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
-plot(sqrtmaygrow ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(modlmer,main="residuals v fitted mixed")
+qqnorm(resid(modlmer));qqline(resid(modlme),main="q-q plot mixed") 
 
-#not using site as random for now
-##########GLMM (mixed model)
-#treeid, spcode, site, aspect, sitequal, timbersale, dominance
-marba <- lmer(logmarba ~ timbersale + sitequal + month + year + spcode + aspect + baselineinddbh + baselinestandBA + rain + temp + baselineinddbh*rain + baselineinddbh*temp + baselineinddbh*baselinestandBA + rain*temp + (1|site), data=dendrol)
-summary(marba)
-(sum(residuals(marba,type="pearson")^2))/375 #chisq over df--note that denominator is residual deviance df, will change for each model
-plot(marba,main="residuals v fitted mixed")
-qqnorm(resid(marba));qqline(resid(marba),main="q-q plot mixed") 
+plot(logmarba ~ timbersale, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+
+
+
 
