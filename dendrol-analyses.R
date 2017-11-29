@@ -18,6 +18,23 @@ dendrol$sqmarba<-sqrt(dendrol$marba)
 #log transform--adding one to deal with 0's--0 transforms to 0
 dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible  
 
+#separate datasets for each species grouping
+hwood <- subset(dendrol,spcode=='QUMO'|spcode=='QURU'|spcode=='QUAL'|spcode=='POGR'|spcode=='CATO'|spcode=='ACRU'|spcode=='BELE')
+swood <- subset(dendrol,spcode=='PIST' | spcode=='TSCA')
+poplar<- dendrol[dendrol$spcode=='LITU',]
+###create var for group instead
+dendrol$group <- ifelse((dendrol$spcode=='QUMO'|dendrol$spcode=='QURU'|dendrol$spcode=='QUAL'|dendrol$spcode=='POGR'|dendrol$spcode=='CATO'|
+                         dendrol$spcode=='ACRU'|dendrol$spcode=='BELE'), 'hwood', 
+                 ifelse((dendrol$spcode=='PIST'|dendrol$spcode=='TSCA'), 'swood', 
+                 ifelse((dendrol$spcode=='LITU'                       ), 'pplar',
+                        "NA")))
+#seasonality variable
+dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'cld',
+                  ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'hot',
+                        "NA"))
+#new dataset for summer months only
+summer<-dendrol[dendrol$season=='hot',]
+
 ###############################Variables:
 #treeid [char]           = individual tree id 
 #spnum [char]            = forestry species code 
@@ -40,6 +57,8 @@ dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible
 #olddbh, oldBA           = previous dbh and basal area (individual)*
 #newdbh, newBA           = new dbh and basal area (individual)
 #mardbh, marBA           = marginal growth in dbh and BA
+#group [char]            = [hwood: oaks and other hardwoods, swood: pine and hemlock, poplar: tulip poplar]
+#season                  = [cld: colder months--may, sep, oct. hot: hotter months--jun, jul, aug]
 # * in 2015, some trees were measured 2 months apart. in these instances, 'growth' is first added to 'prevmeas' to obtain a more accurate estimate of 
 #   old dbh and a more accurate marginal dbh.
 
@@ -90,13 +109,16 @@ plot(dendrol$marba~dendrol$month,xlab="month",ylab=" marginal BA",main="marginal
 plot(dendrol$marba,main="marba")
 plot(dendrol$sqmarba,main="sqmarba")
 plot(dendrol$logmarba,main="logmarba")
+plot(dendrol$logmarba~dendrol$month,xlab="month",ylab="log marginal BA",main="log marginal growth (BA) in each month")
 #q-q plots
 qqnorm(dendrol$marba,main="marba");qqline(dendrol$marba,main="marba") 
 qqnorm(dendrol$sqmarba,main="sqmarba");qqline(dendrol$sqmarba,main="sqmarba") 
 qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba") #log is best
 
+#########add figure: month by month and by timbersale
+
 ##########GLMM (mixed model)
-# predictor: treeid,spcode, site, aspect, sitequal, timbersale, dominance, year, month, baselinestandBA, rain, temp
+# predictor: treeid,spcode, site, aspect, sitequal, timbersale, dominance, year, month, baselinestandBA, rain, temp, group, season
 # response:  growth, marBA
 
 # related:sp-site, sp-qual, sp-aspect, sp-ba, site-ba, site-qual, site-aspect,qual-sale, site-dom, qual-dom, ba-dom, ba-sale, rain-temp
@@ -104,7 +126,7 @@ qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba"
 #Error in MEEM(object, conLin, control$niterEM) : NAs in foreign function call (arg 2)
 #indicates numerical instability, consider re-scaling predictor vars. switching to lmer
 
-#centering and scaling continuous variables
+#centering and scaling continuous variables--rain/temp and BA are on very different scales
 dendrol$baselinestandBAs<-scale(dendrol$baselinestandBA,center=TRUE, scale=TRUE)
 dendrol$rains<-scale(dendrol$rain,center=TRUE, scale=TRUE)
 dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
@@ -112,11 +134,22 @@ dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
 
 modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains + temps +
                   baselinestandBAs*rains*temps + (1|site), data=dendrol) 
-#fixed-effect model matrix is rank deficient so dropping 15 columns / coefficients
+#fixed-effect model matrix is rank deficient so dropping 15 columns / coefficients. AIC=1561
 
-modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year +  (1|site), data=dendrol) 
+modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect), data=dendrol) 
+AIC(modlmer)   ####AIC=1653. Best fit using original variables.
+modlmer <- glm(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
+AIC(modlmer)   ####AIC=1643. Best fit using original variables w/o random
 
-modlmer <- lme(logmarba ~ treeid , data=dendrol,na.action = na.omit) 
+modlmer <- lmer(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps + (1|site/aspect), data=dendrol) 
+AIC(modlmer)   ####AIC=1676. Best fit using group and season.
+modlmer <- glm(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps , data=dendrol) 
+AIC(modlmer)   ####AIC=1667 Best fit using group and season w/o random
+
+modlmer <- lmer(logmarba ~ treeid + aspect + group + sitequal + timbersale + (1|site), data=summer)   
+AIC(modlmer)   ####AIC=784 --- Hessian non-PD with more variables
+modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains, data=summer)  
+AIC(modlmer)   ####AIC=801
 
 Anova(modlmer,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
 summary(modlmer);AIC(modlmer) #from this, get: beta/se/p for continuous vars, R2
@@ -125,10 +158,14 @@ lsmeans(modlmer,list(pairwise ~ timbersale, pairwise ~ sitequal))
 #lsmeans: gives beta (lsmean), se, df, lovercl and upper cl (must manually back-transform)
 #ignore pairwise, still need to figure that out (these are incorrect estimates)
 
-plot(modlmer,main="residuals v fitted mixed")
-qqnorm(resid(modlmer));qqline(resid(modlme),main="q-q plot mixed") 
+qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
 
-plot(logmarba ~ timbersale, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect), data=dendrol)
+plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ year, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ rain, data=dendrol,xlab="Rainfall",ylab="May growth",main="May growth~site quality")
 plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
 
 
