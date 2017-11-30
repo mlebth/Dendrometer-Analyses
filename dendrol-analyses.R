@@ -18,6 +18,11 @@ dendrol$sqmarba<-sqrt(dendrol$marba)
 #log transform--adding one to deal with 0's--0 transforms to 0
 dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible  
 
+#centering and scaling continuous variables--rain/temp and BA are on very different scales
+dendrol$baselinestandBAs<-scale(dendrol$baselinestandBA,center=TRUE, scale=TRUE)
+dendrol$rains<-scale(dendrol$rain,center=TRUE, scale=TRUE)
+dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
+
 #separate datasets for each species grouping
 hwood <- subset(dendrol,spcode=='QUMO'|spcode=='QURU'|spcode=='QUAL'|spcode=='POGR'|spcode=='CATO'|spcode=='ACRU'|spcode=='BELE')
 swood <- subset(dendrol,spcode=='PIST' | spcode=='TSCA')
@@ -131,25 +136,31 @@ dendrol$baselinestandBAs<-scale(dendrol$baselinestandBA,center=TRUE, scale=TRUE)
 dendrol$rains<-scale(dendrol$rain,center=TRUE, scale=TRUE)
 dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
 
-
+#####full model
 modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains + temps +
                   baselinestandBAs*rains*temps + (1|site), data=dendrol) 
 #fixed-effect model matrix is rank deficient so dropping 15 columns / coefficients. AIC=1561
 
-modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect), data=dendrol) 
+#####model selection
+modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect/treeid), data=dendrol) 
 AIC(modlmer)   ####AIC=1653. Best fit using original variables.
-modlmer <- glm(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
-AIC(modlmer)   ####AIC=1643. Best fit using original variables w/o random
+#best glm with dendrol below:
+modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
+AIC(modlmer)   ####AIC=1556 Best fit using original variables w/o random
 
 modlmer <- lmer(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps + (1|site/aspect), data=dendrol) 
 AIC(modlmer)   ####AIC=1676. Best fit using group and season.
-modlmer <- glm(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps , data=dendrol) 
-AIC(modlmer)   ####AIC=1667 Best fit using group and season w/o random
+modlmer <- glm(logmarba ~ treeid + aspect + group + sitequal + timbersale + season + year + rains + temps , data=dendrol) 
+AIC(modlmer)   ####AIC=1566 Best fit using group and season w/o random
 
 modlmer <- lmer(logmarba ~ treeid + aspect + group + sitequal + timbersale + (1|site), data=summer)   
-AIC(modlmer)   ####AIC=784 --- Hessian non-PD with more variables
+AIC(modlmer)   ####Hessian non-PD with more variables
 modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains, data=summer)  
 AIC(modlmer)   ####AIC=801
+
+###########best lmer and glm using dendrol or summer:
+
+modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
 
 Anova(modlmer,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
 summary(modlmer);AIC(modlmer) #from this, get: beta/se/p for continuous vars, R2
@@ -159,6 +170,7 @@ lsmeans(modlmer,list(pairwise ~ timbersale, pairwise ~ sitequal))
 #ignore pairwise, still need to figure that out (these are incorrect estimates)
 
 qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
+shapiro.test(resid(modlmer))
 
 modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect), data=dendrol)
 plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
