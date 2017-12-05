@@ -34,11 +34,11 @@ dendrol$group <- ifelse((dendrol$spcode=='QUMO'|dendrol$spcode=='QURU'|dendrol$s
                  ifelse((dendrol$spcode=='LITU'                       ), 'pplar',
                         "NA")))
 #seasonality variable
-dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'cld',
-                  ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'hot',
+dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'ngr',
+                  ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'gro',
                         "NA"))
 #new dataset for summer months only
-summer<-dendrol[dendrol$season=='hot',]
+summer<-dendrol[dendrol$season=='gro',]
 
 ###############################Variables:
 #treeid [char]           = individual tree id 
@@ -137,42 +137,99 @@ dendrol$rains<-scale(dendrol$rain,center=TRUE, scale=TRUE)
 dendrol$temps<-scale(dendrol$temp,center=TRUE, scale=TRUE)
 
 #####full model
-modlmer <- lmer(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains + temps +
-                  baselinestandBAs*rains*temps + (1|site), data=dendrol) 
+modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains + temps +
+                  baselinestandBAs*rains*temps + (1|site/treeid), data=dendrol) 
 #fixed-effect model matrix is rank deficient so dropping 15 columns / coefficients. AIC=1561
 
 #####model selection
-modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect/treeid), data=dendrol) 
-AIC(modlmer)   ####AIC=1653. Best fit using original variables.
+modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + month + year + rains + temps + spcode*sitequal*timbersale + (1|site/treeid), data=dendrol) 
+AIC(modlmer)   ####AIC=1551. Best fit using original variables.
+qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed")
 #best glm with dendrol below:
 modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
 AIC(modlmer)   ####AIC=1556 Best fit using original variables w/o random
 
-modlmer <- lmer(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps + (1|site/aspect), data=dendrol) 
-AIC(modlmer)   ####AIC=1676. Best fit using group and season.
+modlmer <- lmer(logmarba ~ aspect + group + sitequal + timbersale + season + year + rains + temps +(1|site/treeid), data=dendrol) 
+AIC(modlmer)   ####AIC=1608. Best fit using group and season.
 modlmer <- glm(logmarba ~ treeid + aspect + group + sitequal + timbersale + season + year + rains + temps , data=dendrol) 
 AIC(modlmer)   ####AIC=1566 Best fit using group and season w/o random
 
-modlmer <- lmer(logmarba ~ treeid + aspect + group + sitequal + timbersale + (1|site), data=summer)   
-AIC(modlmer)   ####Hessian non-PD with more variables
-modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains, data=summer)  
-AIC(modlmer)   ####AIC=801
+modlmersumm <- lmer(logmarba ~ aspect + group + sitequal + timbersale + dominance + month + year + rains + (1|site/treeid), data=summer)   
+AIC(modlmersumm)   ####AIC=836
+modglmsumm <- glm(logmarba ~ aspect + group + sitequal + timbersale + dominance + month + year + baselinestandBAs + rains, data=summer)  
+AIC(modglmsumm)   ####AIC=801
 
-###########best lmer and glm using dendrol or summer:
+Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
+summary(modlmersumm)#from this, get: beta/se/p for continuous vars, R2
+(sum(residuals(modlmersumm,type="pearson")^2))/195 #chisq over df--note that denominator is residual deviance df, will change for each model
 
-modlmer <- glm(logmarba ~ treeid + aspect + spcode + sitequal + timbersale + month + year + rains + temps , data=dendrol) 
-
+###########best models using dendrol or summer:
+#######best model
+modlmer <- lmer(logmarba ~ aspect + year + rains + temps + group + timbersale + group:timbersale + group:season + timbersale:season + sitequal*season + (1|site/treeid), data=dendrol) 
+vif.lme(modlmer) ##originally had spcode--led to very high vifs (up to 52). less multicollinearity with group and sitequal removed from interaction.
 Anova(modlmer,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
-summary(modlmer);AIC(modlmer) #from this, get: beta/se/p for continuous vars, R2
-(sum(residuals(modlmer,type="pearson")^2))/375 #chisq over df--note that denominator is residual deviance df, will change for each model
-lsmeans(modlmer,list(pairwise ~ timbersale, pairwise ~ sitequal))
+summary(modlmer) #from this, get: beta/se/p for continuous vars, R2
+qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
+
+lsmeans(modlmer,list(pairwise ~ year, pairwise ~ group:timbersale, pairwise ~ group:season, pairwise ~ timbersale:season, pairwise ~ season:sitequal))
+#more growth in site quality=2 than in site quality=3
+#more growth in 'hot' than 'cold' months
+#more growth in 2015 and 2017 than in 2016
+
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="marginal change in log BA",main="Site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="marginal change in log BA",main="Month")
+plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="marginal change in log BA",main="Year")
+
+
+plot.window.orig <- plot.window
+plot.window <- function(xlim, ylim, log="", asp=NA, ...) {
+    if (!all(is.finite(xlim))) xlim <- c(0,1)
+    if (!all(is.finite(ylim))) ylim <- c(0,1)
+    plot.window.orig(xlim, ylim, log="", asp=NA, ...)
+ }
+assignInNamespace("plot.window", plot.window, "graphics")
+
+
+######summer-only model; similar results but poorer fit
+modlmersumm <- lmer(logmarba ~ aspect + group + sitequal + timbersale + dominance + month + year + rains + group*timbersale + (1|site/treeid), data=summer)   
+vif.lme(modlmersumm) ##vifs of sitequal >10, removed from interaction; group better than spcode
+Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
+summary(modlmersumm) #from this, get: beta/se/p for continuous vars, R2
+qqnorm(resid(modlmersumm));qqline(resid(modlmersumm),main="q-q plot mixed") 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#vif function
+vif.lme <- function (fit) {
+     ## adapted from rms::vif
+     v <- vcov(fit)
+     nam <- names(fixef(fit))
+     ## exclude intercepts
+     ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
+     if (ns > 0) {
+         v <- v[-(1:ns), -(1:ns), drop = FALSE]
+         nam <- nam[-(1:ns)] }
+     d <- diag(v)^0.5
+     v <- diag(solve(v/(d %o% d)))
+     names(v) <- nam
+     v }
+
+lsmeans(modbestglm,list(pairwise ~ timbersale, pairwise ~ sitequal))
 #lsmeans: gives beta (lsmean), se, df, lovercl and upper cl (must manually back-transform)
 #ignore pairwise, still need to figure that out (these are incorrect estimates)
-
-qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
-shapiro.test(resid(modlmer))
-
-modlmer <- lmer(logmarba ~ aspect + spcode + sitequal + timbersale + month + year + rains + temps + (1|site/aspect), data=dendrol)
+ 
 plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
 plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
 plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
