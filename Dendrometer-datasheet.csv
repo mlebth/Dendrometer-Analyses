@@ -1,0 +1,20 @@
+Variable name,Meaning
+treeid,individual id
+installdate,date of original installation
+spnum,species number
+spname,species name
+spcode,species code
+site,site name
+aspect,aspect
+sitequal,site quality
+timbersale,timbersale?
+dominance,dominance
+baselinestandBA,stand BA at installation date
+baselineinddbh,individual DBH at installation date/date of first zeroing
+tension,dendrometer band tension
+year,year of data collection
+month,month of data collection
+day,day of data collection
+growth,growth (mm)
+compsp,competing species
+comments,comments
