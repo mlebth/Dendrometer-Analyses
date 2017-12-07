@@ -165,7 +165,9 @@ summary(modlmersumm)#from this, get: beta/se/p for continuous vars, R2
 
 ###########best models using dendrol or summer:
 #######best model
-modlmer <- lmer(logmarba ~ aspect + year + rains + temps + group + timbersale + group:timbersale + group:season + timbersale:season + sitequal*season + (1|site/treeid), data=dendrol) 
+modlmer <- lmer(logmarba ~ aspect + year + rains + temps + group + timbersale + group:timbersale + group:season + timbersale:season + 
+                 sitequal*season + (1|site/treeid), data=dendrol)
+AIC(modlmer)
 vif.lme(modlmer) ##originally had spcode--led to very high vifs (up to 52). less multicollinearity with group and sitequal removed from interaction.
 Anova(modlmer,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
 summary(modlmer) #from this, get: beta/se/p for continuous vars, R2
@@ -175,6 +177,15 @@ lsmeans(modlmer,list(pairwise ~ year, pairwise ~ group:timbersale, pairwise ~ gr
 #more growth in site quality=2 than in site quality=3
 #more growth in 'hot' than 'cold' months
 #more growth in 2015 and 2017 than in 2016
+
+growth_subject <- fixef(modlmer) + ranef(modlmer)$treeid
+growth_subject$treeid<-rownames(growth_subject)
+names(growth_subject)[1]<-"Intercept"
+growth_subject <- growth_subject[,c(2,1)]
+#plot
+ggplot(growth_subject,aes(x=treeid,y=Intercept))+geom_point()
+
+
 
 plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="marginal change in log BA",main="Site quality")
 plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="marginal change in log BA",main="Month")
@@ -196,20 +207,6 @@ vif.lme(modlmersumm) ##vifs of sitequal >10, removed from interaction; group bet
 Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the contrasts for vars w/2 categorical levels
 summary(modlmersumm) #from this, get: beta/se/p for continuous vars, R2
 qqnorm(resid(modlmersumm));qqline(resid(modlmersumm),main="q-q plot mixed") 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #vif function
 vif.lme <- function (fit) {
