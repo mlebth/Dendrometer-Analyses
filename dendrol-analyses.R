@@ -40,6 +40,21 @@ dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$mont
 #new dataset for summer months only
 summer<-dendrol[dendrol$season=='gro',]
 
+#vif function
+vif.lme <- function (fit) {
+  ## adapted from rms::vif
+  v <- vcov(fit)
+  nam <- names(fixef(fit))
+  ## exclude intercepts
+  ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
+  if (ns > 0) {
+    v <- v[-(1:ns), -(1:ns), drop = FALSE]
+    nam <- nam[-(1:ns)] }
+  d <- diag(v)^0.5
+  v <- diag(solve(v/(d %o% d)))
+  names(v) <- nam
+  v }
+
 ###############################Variables:
 #treeid [char]           = individual tree id 
 #spnum [char]            = forestry species code 
@@ -163,6 +178,7 @@ Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the co
 summary(modlmersumm)#from this, get: beta/se/p for continuous vars, R2
 (sum(residuals(modlmersumm,type="pearson")^2))/195 #chisq over df--note that denominator is residual deviance df, will change for each model
 
+
 ###########best models using dendrol or summer:
 #######best model
 modlmer <- lmer(logmarba ~ aspect + year + rains + temps + group + timbersale + group:timbersale + group:season + timbersale:season + 
@@ -178,28 +194,6 @@ lsmeans(modlmer,list(pairwise ~ year, pairwise ~ group:timbersale, pairwise ~ gr
 #more growth in 'hot' than 'cold' months
 #more growth in 2015 and 2017 than in 2016
 
-growth_subject <- fixef(modlmer) + ranef(modlmer)$treeid
-growth_subject$treeid<-rownames(growth_subject)
-names(growth_subject)[1]<-"Intercept"
-growth_subject <- growth_subject[,c(2,1)]
-#plot
-ggplot(growth_subject,aes(x=treeid,y=Intercept))+geom_point()
-
-
-
-plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="marginal change in log BA",main="Site quality")
-plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="marginal change in log BA",main="Month")
-plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="marginal change in log BA",main="Year")
-
-
-plot.window.orig <- plot.window
-plot.window <- function(xlim, ylim, log="", asp=NA, ...) {
-    if (!all(is.finite(xlim))) xlim <- c(0,1)
-    if (!all(is.finite(ylim))) ylim <- c(0,1)
-    plot.window.orig(xlim, ylim, log="", asp=NA, ...)
- }
-assignInNamespace("plot.window", plot.window, "graphics")
-
 
 ######summer-only model; similar results but poorer fit
 modlmersumm <- lmer(logmarba ~ aspect + group + sitequal + timbersale + dominance + month + year + rains + group*timbersale + (1|site/treeid), data=summer)   
@@ -208,32 +202,9 @@ Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the co
 summary(modlmersumm) #from this, get: beta/se/p for continuous vars, R2
 qqnorm(resid(modlmersumm));qqline(resid(modlmersumm),main="q-q plot mixed") 
 
-#vif function
-vif.lme <- function (fit) {
-     ## adapted from rms::vif
-     v <- vcov(fit)
-     nam <- names(fixef(fit))
-     ## exclude intercepts
-     ns <- sum(1 * (nam == "Intercept" | nam == "(Intercept)"))
-     if (ns > 0) {
-         v <- v[-(1:ns), -(1:ns), drop = FALSE]
-         nam <- nam[-(1:ns)] }
-     d <- diag(v)^0.5
-     v <- diag(solve(v/(d %o% d)))
-     names(v) <- nam
-     v }
-
 lsmeans(modbestglm,list(pairwise ~ timbersale, pairwise ~ sitequal))
 #lsmeans: gives beta (lsmean), se, df, lovercl and upper cl (must manually back-transform)
 #ignore pairwise, still need to figure that out (these are incorrect estimates)
- 
-plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
-plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ year, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ rain, data=dendrol,xlab="Rainfall",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-
 
 
 
