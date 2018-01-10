@@ -7,16 +7,13 @@ give.n <- function(x){
 ggplot(dendrol, aes(x=sitequal, y=logmarba, fill=group)) + 
   geom_boxplot() +  
   stat_boxplot(geom ='errorbar') + 
-  stat_summary(fun.data = give.n, geom = "text", position = position_dodge(width = 0.75), size = 4) +
-  geom_text(aes(label=posthoc.l, y=live+(live.se/1.8)), vjust=-1.5) + #????
+  #stat_summary(fun.data = give.n, geom = "text", position = position_dodge(width = 0.75), size = 4) +
   theme_minimal() + 
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
   scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
   labs(x = "Site quality", y="Marginal growth of log basal area", title="Site quality") +
-  geom_point(position = position_jitterdodge(jitter.width=0.035, dodge.width=0.75))  #jitter and dodge 
-
-text(1:length(plot$n), plot$stats[5,]+1, paste("n=", plot$n))
+  geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge 
 
 #option to just dodge
   geom_point(position = position_dodge(width=0.75)) 
