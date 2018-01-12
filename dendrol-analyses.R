@@ -178,6 +178,9 @@ Anova(modlmersumm,type="III") #get: num df, F, P of each var. F and p are the co
 summary(modlmersumm)#from this, get: beta/se/p for continuous vars, R2
 (sum(residuals(modlmersumm,type="pearson")^2))/195 #chisq over df--note that denominator is residual deviance df, will change for each model
 
+#### comment 1/12/2018: after you hear from tim, add in: distance to edge (var = 'near'), thinning intensity, azimuth, 
+#### tree age, try again with baseline stand BA, but note that the reason they're not both in might be because
+#### they're related (avg. baseline stand BA for non-timbersale areas is 135, got timbersale areas is 81)  ####
 
 ###########best models using dendrol or summer:
 #######best model
