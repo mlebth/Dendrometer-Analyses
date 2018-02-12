@@ -9,6 +9,15 @@ ageaz <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Tree Growth Data/Age+Azimut
 dendrol<-join(dendrolreadin,ageaz,by=c('treeid','year'),type='left',match='all')
 #summary(dendrol)
 
+#calculating predicted ages from baselinedbh
+temp <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/age+baselineinddbh.csv') #file with just baseline dbh and age (of corresponding year in which baseline dbh was taken)
+lmmod <- lm(age~baselinedbh, data=temp); summary(lmmod) #p=0.04
+xyplot(age~baselinedbh, data=temp)
+coeffs <- coefficients(lmmod); coeffs #intercept and slope
+#calculating age for tree #s 19 and 20 from their initial dbh.
+initialdbh19 <- 13.6; temp$newage19 <- coeffs[1] + coeffs[2]*initialdbh19; newage19 #73.24413
+initialdbh21 <- 10.9; temp$newage21 <- coeffs[1] + coeffs[2]*initialdbh21; newage21 #68.06128
+
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
 #making numeric vars factors as needed
 dendrol$treeid <- factor(dendrol$treeid)

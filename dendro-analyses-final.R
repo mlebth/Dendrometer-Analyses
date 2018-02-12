@@ -1,6 +1,6 @@
 
 library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car);library(emmeans);library(AICcmodavg)
-library(PerformanceAnalytics);library(Hmisc);library(nlme)
+library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
 dendrol <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-4.csv')
@@ -17,7 +17,6 @@ dendrol$sitequal <- factor(dendrol$sitequal)
 dendrol$sqmarba<-sqrt(dendrol$marba)
 #log transform--adding one to deal with 0's--0 transforms to 0
 dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible  
-
 
 #separate datasets for each species grouping
 hwood <- subset(dendrol,spcode=='QUMO'|spcode=='QURU'|spcode=='QUAL'|spcode=='POGR'|spcode=='CATO'|spcode=='ACRU'|spcode=='BELE')
@@ -54,20 +53,18 @@ vif.lme <- function (fit) {
 #exploring relationship between age and initial size
 dat2015 <- subset(dendrol,year == 2015); dat2016 <- subset(dendrol,year == 2016); dat2017 <- subset(dendrol,year == 2017)
 xyplot(baselineinddbh~age, data=dat2015, groups=group, auto.key = TRUE)
-modelaov<- aov(age ~ baselineinddbh, data=dendrol);summary(modelaov) #p<0.0001 -- age and size are positively related
+modelaov<- aov(baselineinddbh ~ age, data=dendrol);summary(modelaov) #p<0.0001 -- age and size are positively related
 qqnorm(resid(modelaov));qqline(resid(modelaov)) 
 
 #relationship between age and marginal growth
-modelaov<- aov(age ~ logmarba, data=dendrol);summary(modelaov) #p=0.3 -- no relationship observed between age and marginal growth
-xyplot(logmarba~age, data=dat2015, groups=group, auto.key = TRUE)
+modelaov<- aov(logmarba~age, data=dendrol);summary(modelaov) #p=0.25 -- no relationship observed between age and marginal growth
+xyplot(logmarba~age, data=dendrol, groups=group, auto.key = TRUE)
 qqnorm(resid(modelaov));qqline(resid(modelaov)) 
 
 #relationship between age and size each year
-modelaov<- aov(age ~ newdbh, data=dendrol);summary(modelaov) #p=0.002 -- positive relationship between age and size each year
-xyplot(newdbh~age, data=dat2015, groups=group, auto.key = TRUE)
-xyplot(baselineinddbh~age, data=dat2015, groups=group, auto.key = TRUE)
+modelaov<- aov(newdbh~age, data=dendrol);summary(modelaov) #p=0.001 -- positive relationship between age and size each year
+xyplot(newdbh~age, data=dendrol, groups=group, auto.key = TRUE)
 qqnorm(resid(modelaov));qqline(resid(modelaov)) 
-
 
 ###############################Variables:
 #treeid [char]           = individual tree id 
@@ -130,7 +127,7 @@ AICc(modlmer) #original:1611
 
 #let the selection process begin:
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 
-                + group:sitequal + group:timbersale + group:season + group:year + age:season
+                + group:sitequal + group:timbersale + group:season + group:year + age:season 
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) 
 #-age:rain (1593), -age:near (1583), -age:temp (1569), -age:aspect (1564), -age:year (1545), -age:timbersale (1537), -age:sitequal (1527)
@@ -145,16 +142,52 @@ summary(modlmer);Anova(modlmer)
 ggplot(dendrol, aes(x=age, y=logmarba, fill=season)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
 
-ggplot(dendrol, aes(x=timbersale, y=logmarba, fill=group)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
 
-ggplot(dendrol, aes(x=season, y=logmarba, fill=group)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
+ggplot(dendrol, aes(x=age, y=logmarba, color=season)) + 
+  geom_point(size=3, alpha=0.75) +
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
+  scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
+  scale_color_manual(values=c("forestgreen", "gray70"),name="Season",breaks = c("gro", "ngr"), labels=c("Growing", "Non-growing")) +
+  labs(x = "Age", y="Marginal growth of log basal area", title="Age*Season")
 
-ggplot(dendrol, aes(x=year, y=logmarba, fill=group)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
+
+#timbersale and group
+ggplot(dendrol, aes(x=timbersale, y=logmarba, fill=group)) + 
+  geom_boxplot() +  
+  stat_boxplot(geom ='errorbar') + 
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
+  scale_x_discrete(labels=c("Unthinned", "Thinned")) +
+  scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
+  labs(x = "Timbersale", y="Marginal growth of log basal area", title="Group*Timbersale") +
+  geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge  
+
+#season and group
+ggplot(dendrol, aes(x=season, y=logmarba, fill=group)) + 
+  geom_boxplot() +  
+  stat_boxplot(geom ='errorbar') + 
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
+  scale_x_discrete(labels=c("Growing season", "Non-growing season")) +
+  scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
+  labs(x = "Season", y="Marginal growth of log basal area", title="Group*Season") +
+  geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge  
+
+#year and group
+ggplot(dendrol, aes(x=year, y=logmarba, fill=group)) + 
+  geom_boxplot() +  
+  stat_boxplot(geom ='errorbar') + 
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
+  scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
+  labs(x = "Year", y="Marginal growth of log basal area", title="Group*Year") +
+  geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge   
                 
-                
+
 #summer models
 
 ########### all variables (without interactions)--testing for multicollinearity using VIF
@@ -206,4 +239,51 @@ ggplot(summer, aes(x=year, y=logmarba, fill=group)) + geom_boxplot() + stat_boxp
 #   positive with age *only* in summer.
 #   within summer, positive with month.
 
- 
+
+
+
+
+########################using new age
+
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
+                + age:group
+                + age:season
+                + group:sitequal + group:timbersale + group:season + group:year + group:temp + group:near + group:rain
+                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer) #original:1713
+
+#let the selection process begin:
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
+                + age:season
+                + group:sitequal + group:timbersale + group:season + group:year 
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer) 
+#-age:rain (1700), -age:near (1685), -age:temp (1670), -age:aspect (1667), -age:year (1648), -age:timbersale (1641), -age:sitequal (1631)
+#-group:rain (1624), -group:temp (1612), -age:group (1606), -group:near (1602)
+#-baselinestandBA (1593), -baselineinddbh (1590), -temp (1586), -near (1577)
+#NOTE I did try using newdbh (size) instead of age--resulted in poorer fits
+
+#summer
+summermod <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #all variables
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #refined variables
+vif.lme(summermod) #cutoff = 5; round 1: spcode to group
+
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
+                + age:group
+                + age:month
+                + group:sitequal + group:timbersale + group:year + group:temp + group:near + group:rain
+                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + (1|site/treeid), data=summer) 
+AICc(summermod) #original:971
+
+#let the selection process begin:
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect +  rain 
+                + group:sitequal + group:timbersale + group:year 
+                + (1|site/treeid), data=summer) 
+AICc(summermod) 
+#-age:rain (958), -age:near (942), -age:temp (929), -age:aspect (925), -age:year (905), -age:timbersale (897), -age:sitequal (887)
+#-group:rain (881), -group:temp (871), -age:group (866), -group:near (862), -age:month (850)
+#-baselinestandBA (841), -baselineinddbh (836), -temp (830), -near (822)
