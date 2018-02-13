@@ -15,9 +15,11 @@ ggplot(dendrol, aes(x=sitequal, y=logmarba, fill=group)) +
   labs(x = "Site quality", y="Marginal growth of log basal area", title="Site quality") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge 
 
-
-ggplot(sum, aes(x=Genotype, y=Activity, color=Sex)) + 
-  geom_errorbar(aes(ymin=Activity-se, ymax=Activity+se), width=.2, size=0.7, position=pd) +
+sum = summarySE(dendrol, measurevar="logmarba", groupvars=c("sitequal","group"))
+sum
+pd = position_dodge(.2)
+ggplot(dendrol, aes(x=sitequal, y=logmarba, color=group)) + 
+  geom_errorbar(aes(ymin=logmarba-se, ymax=logmarba+se), width=.2, size=0.7, position=pd) +
   geom_point(shape=15, size=4, position=pd) +
   theme_bw() +
   theme(axis.title.y = element_text(vjust= 1.8), axis.title.x = element_text(vjust= -0.5), axis.title = element_text(face = "bold")) +

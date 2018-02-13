@@ -123,37 +123,26 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
                 + group:sitequal + group:timbersale + group:season + group:year + group:temp + group:near + group:rain
                 + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
                 + (1|site/treeid), data=dendrol) 
-AICc(modlmer) #original:1713
+AICc(modlmer) #original:1611
 
 #let the selection process begin:
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
-                + age:season
-                + group:sitequal + group:timbersale + group:season + group:year 
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 
+                + group:sitequal + group:timbersale + group:season + group:year + age:season 
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) 
-#-age:rain (1700), -age:near (1685), -age:temp (1670), -age:aspect (1667), -age:year (1648), -age:timbersale (1641), -age:sitequal (1631)
-#-group:rain (1624), -group:temp (1612), -age:group (1606), -group:near (1602)
-#-baselinestandBA (1593), -baselineinddbh (1590), -temp (1586), -near (1577)
+#-age:rain (1593), -age:near (1583), -age:temp (1569), -age:aspect (1564), -age:year (1545), -age:timbersale (1537), -age:sitequal (1527)
+#-group:rain (1520), -group:temp (1507), -age:group (1502), -group:near (1499)
+#-baselinestandBA (1490), -baselineinddbh (1486), -rain (1484), -temp (1479), -near (1472)
 #NOTE I did try using newdbh (size) instead of age--resulted in poorer fits
+
 qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
 summary(modlmer);Anova(modlmer)
 
-#lsmeans fpr all categorical interactions
-grouptimber <- lsmeans(modlmer, list(pairwise ~ group|timbersale))
-groupseason <- lsmeans(modlmer, list(pairwise ~ group|season))
-groupyear   <- lsmeans(modlmer, list(pairwise ~ group|year))
-
-#tables
-with(dendrol, table(timbersale, group))
-with(dendrol, table(season, group))
-with(dendrol, table(year, group))
-
-
 #sig. interactions: group and: timbersale, season, year; season:age
-#age and season
 ggplot(dendrol, aes(x=age, y=logmarba, fill=season)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
-#age and season (scatterplot)
+
+
 ggplot(dendrol, aes(x=age, y=logmarba, color=season)) + 
   geom_point(size=3, alpha=0.75) +
   theme_minimal() + 
@@ -161,6 +150,7 @@ ggplot(dendrol, aes(x=age, y=logmarba, color=season)) +
   scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
   scale_color_manual(values=c("forestgreen", "gray70"),name="Season",breaks = c("gro", "ngr"), labels=c("Growing", "Non-growing")) +
   labs(x = "Age", y="Marginal growth of log basal area", title="Age*Season")
+
 
 #timbersale and group
 ggplot(dendrol, aes(x=timbersale, y=logmarba, fill=group)) + 
@@ -196,11 +186,104 @@ ggplot(dendrol, aes(x=year, y=logmarba, fill=group)) +
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
   labs(x = "Year", y="Marginal growth of log basal area", title="Group*Year") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge   
+                
+
+#summer models
+
+########### all variables (without interactions)--testing for multicollinearity using VIF
+modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #all variables
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #refined variables
+vif.lme(modlmer) #cutoff = 5; round 1: spcode to group
+
+
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
+                + age:group
+                + age:month
+                + group:sitequal + group:timbersale + group:year + group:temp + group:near + group:rain
+                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + (1|site/treeid), data=summer) 
+AICc(modlmer) #original:920.15
+
+#let the selection process begin:
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect 
+                + group:sitequal + group:timbersale + group:year 
+                + (1|site/treeid), data=summer) 
+AICc(summermod) 
+#-age:rain (769), -age:near (875), -age:temp (866), -age:aspect (861), -age:year (842), -age:timbersale (835), -age:sitequal (825)
+#-group:rain (818), -group:temp (810), -age:group (804), -group:near (801)
+#-baselinestandBA (792), -baselineinddbh (787), -temp (780), -near (769), -rain (767)
+
+qqnorm(resid(summermod));qqline(resid(summermod),main="q-q plot mixed") 
+summary(summermod);Anova(summermod)
+
+#sig. interactions: group and: timbersale, year
+ggplot(summer, aes(x=timbersale, y=logmarba, fill=group)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
+
+ggplot(summer, aes(x=year, y=logmarba, fill=group)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
 
 #summary of results for summer and dendro:
-# positive with sitequal and rain (also with timbersale, season and year, but those are all in interactions)
-# interactions:
-#   season:age (younger trees grow faster in summer)
-#   group:timbersale (softwood grow fastest in thinned areas)
-#   group:season (poplar grow fastest in growing season)
-#   group:year (hardwood grow most in 2015, poplar in 2015 and 2016, softwood in 2015 and 2016)
+#in dendrol:
+#   positive with sitequal, timbersale, season, and year (all but sitequal in interactions)
+#   interaction between group and timbersale, group and year, group and season
+#   interaction between season and age
+#in summer:
+#   positive with sitequal, timbersale, month, year, and age
+#   interaction between group and timbersale, group and year
+
+#summary for both:
+#   positive with sitequal. interactions between group and timbersale and group and year.
+#   positive with age *only* in summer.
+#   within summer, positive with month.
+
+
+
+
+
+########################using new age
+
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
+                + age:group
+                + age:season
+                + group:sitequal + group:timbersale + group:season + group:year + group:temp + group:near + group:rain
+                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer) #original:1713
+
+#let the selection process begin:
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
+                + age:season
+                + group:sitequal + group:timbersale + group:season + group:year 
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer) 
+#-age:rain (1700), -age:near (1685), -age:temp (1670), -age:aspect (1667), -age:year (1648), -age:timbersale (1641), -age:sitequal (1631)
+#-group:rain (1624), -group:temp (1612), -age:group (1606), -group:near (1602)
+#-baselinestandBA (1593), -baselineinddbh (1590), -temp (1586), -near (1577)
+#NOTE I did try using newdbh (size) instead of age--resulted in poorer fits
+
+#summer
+summermod <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #all variables
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
+                + rain + temp + near + (1|site/treeid), data=summer) #refined variables
+vif.lme(summermod) #cutoff = 5; round 1: spcode to group
+
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
+                + age:group
+                + age:month
+                + group:sitequal + group:timbersale + group:year + group:temp + group:near + group:rain
+                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + (1|site/treeid), data=summer) 
+AICc(summermod) #original:971
+
+#let the selection process begin:
+summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month + year + age + aspect +  rain 
+                + group:sitequal + group:timbersale + group:year 
+                + (1|site/treeid), data=summer) 
+AICc(summermod) 
+#-age:rain (958), -age:near (942), -age:temp (929), -age:aspect (925), -age:year (905), -age:timbersale (897), -age:sitequal (887)
+#-group:rain (881), -group:temp (871), -age:group (866), -group:near (862), -age:month (850)
+#-baselinestandBA (841), -baselineinddbh (836), -temp (830), -near (822)
