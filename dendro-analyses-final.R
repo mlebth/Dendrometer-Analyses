@@ -35,6 +35,10 @@ dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$mont
 #new dataset for summer months only
 summer<-dendrol[dendrol$season=='gro',]
 
+#maybe try to pool rainfall?
+dendrol$poolrain <- ifelse((dendrol$season=='ngr'),dendrol$poolrain=mean(dendrol$rain),
+                    ifelse((dendrol$season=='gro'),dendrol$poolrain=mean(dendrol$rain), NA))
+
 #vif function
 vif.lme <- function (fit) {
   ## adapted from rms::vif
@@ -49,6 +53,13 @@ vif.lme <- function (fit) {
   v <- diag(solve(v/(d %o% d)))
   names(v) <- nam
   v }
+
+#exploring relationship between rainfall and season
+modellm<- lm(rain ~ season, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and season are positively related
+
+#exploring relationship between rainfall and month
+modellm<- lm(rain ~ month, data=dendrol);summary(modellm) #p<0.0001 -- mostly in the growting season
+
 
 #exploring relationship between age and initial size
 dat2015 <- subset(dendrol,year == 2015); dat2016 <- subset(dendrol,year == 2016); dat2017 <- subset(dendrol,year == 2017)
@@ -119,9 +130,8 @@ AICc(modlmer) #age much better than newdbh, aspect slightly better than azadj
 #######################
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + near + temp + rain + baselineinddbh + baselinestandBA
                 + age:group
-                + age:season
-                + group:sitequal + group:timbersale + group:season + group:year + group:temp + group:near + group:rain
-                + age:sitequal + age:timbersale + age:year + age:aspect + age:temp + age:near + age:rain
+                + group:sitequal + group:timbersale + group:year + group:season + group:temp + group:rain + group:near 
+                + age:sitequal   + age:timbersale   + age:year   + age:season   + age:temp   + age:rain   + age:near   + age:aspect
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) #original:1713
 
@@ -196,6 +206,7 @@ ggplot(dendrol, aes(x=year, y=logmarba, fill=group)) +
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
   labs(x = "Year", y="Marginal growth of log basal area", title="Group*Year") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge   
+
 
 #summary of results for summer and dendro:
 # positive with sitequal and rain (also with timbersale, season and year, but those are all in interactions)

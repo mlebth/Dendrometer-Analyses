@@ -3,7 +3,7 @@ library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelec
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
-dendrol <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-4.csv')
+dendrol <- read.csv('H:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-4.csv')
 
 #making month a factor variable
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
@@ -284,6 +284,9 @@ summermod <- lmer(logmarba ~ group + sitequal + timbersale + dominance + month +
                 + group:sitequal + group:timbersale + group:year 
                 + (1|site/treeid), data=summer) 
 AICc(summermod) 
+Anova(summermod)
+grouptimber <- lsmeans(modlmer, list(pairwise ~ group|timbersale))
+
 #-age:rain (958), -age:near (942), -age:temp (929), -age:aspect (925), -age:year (905), -age:timbersale (897), -age:sitequal (887)
 #-group:rain (881), -group:temp (871), -age:group (866), -group:near (862), -age:month (850)
 #-baselinestandBA (841), -baselineinddbh (836), -temp (830), -near (822)
