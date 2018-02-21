@@ -38,7 +38,7 @@ summary(modlmer);Anova(modlmer)
 
 #lsmeans fpr all categorical interactions
 year <- lsmeans(modlmer, list(pairwise ~ year))
-groupsitequal <- lsmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~sitequal|group))
+groupsitequal <- emmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~sitequal|group))
 grouptimber   <- lsmeans(modlmer, list(pairwise ~ group|timbersale, pairwise~timbersale|group))
 groupseason   <- lsmeans(modlmer, list(pairwise ~ group|season, pairwise~season|group))
 
@@ -51,6 +51,9 @@ year   <- lsmeans(modlmer, list(pairwise ~ year))
 
 
 #rainfall and season
+
+### 85% confidence intervals instead of 95%
+#### overwinter change/total annual change -- either total annual, or october-april--include (annual) precipitation
 
 
 library(jtools)
@@ -88,6 +91,57 @@ ggplot(dendrol, aes(x=timbersale, y=logmarba, fill=group)) +
   scale_fill_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
   labs(x = "Timbersale", y="Marginal growth of log basal area", title="Group*Timbersale") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge  
+
+pd=position_dodge(0.4)
+#######group x timbersale
+mean<-c(2.301423,-0.375254,2.975134,6.296589);cldown<-c(-0.2581612,-3.9584525,0.5501371,2.5181204)
+clup<-c(4.861008,3.207944,5.400132,10.075058)
+timber<-c("Unthinned","Unthinned","Thinned","Thinned");group<-c("Hardwood","Softwood","Hardwood","Softwood")
+timbergroup.dat <- data.frame(timber,group,mean,cldown,clup)
+
+ggplot(timbergroup.dat, aes(x=timber, y=mean, color=group)) +  
+  geom_point(shape=15, size=3, position=pd) +  
+  geom_errorbar(width=.2, size=1,aes(ymin=cldown, ymax=clup),position=pd) +
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + 
+  labs(x="Timbersale",y="Log of marginal basal area",title="Thin X Group") +
+  scale_color_manual(values = c("#999999", "#56B4E9"),name="Group")
+
+#######group x season
+mean<-c(3.902353,3.346368,1.374205,2.574967);cldown<-c(1.0896177,-0.1568609,-1.4476591,-0.9016096)
+clup<-c(6.715089,6.849597,4.196068,6.051544)
+season<-c("Growing","Growing","Non-growing","Non-growing");group<-c("Hardwood","Softwood","Hardwood","Softwood")
+seasongroup.dat <- data.frame(season,group,mean,cldown,clup)
+
+ggplot(seasongroup.dat, aes(x=season, y=mean, color=group)) +  
+  geom_point(shape=15, size=3, position=pd) +  
+  geom_errorbar(width=.2, size=1,aes(ymin=cldown, ymax=clup),position=pd) +
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + 
+  labs(x="Season",y="Log of marginal basal area",title="Season X Group") +
+  scale_color_manual(values = c("#999999", "#56B4E9"),name="Group")
+
+
+#######group x sitequal #not done
+mean<-c(2.8872994
+,3.8858533
+,3.3017107
+,2.574967);cldown<-c(0.01214853,0.24086871
+,-0.25306614
+,-0.9016096)
+clup<-c(5.76245
+,7.530838
+,6.856488
+,6.051544)
+sitequal<-c("1","1","2","2","3","3");group<-c("hwood","swood","hwood","swood","hwood","swood")
+sitequalgroup.dat <- data.frame(sitequal,group,mean,cldown,clup)
+
+ggplot(seasongroup.dat, aes(x=sitequal, y=mean, color=group)) +  
+  geom_point(shape=21, size=3, position=pd) +  
+  geom_errorbar(width=.1, aes(ymin=cldown, ymax=clup),position=pd) +
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + 
+  labs(x="Sitequal",y="Log of marginal basal area",title="Sitequal X Group")
 
 #season and group
 ggplot(dendrol, aes(x=season, y=logmarba, fill=group)) + 
