@@ -1,13 +1,8 @@
-#function for sample size, to be used in boxplots
-give.n <- function(x){
-  return(c(y = mean(x), label = length(x)))
-}
 
 #grouped boxplots
 ggplot(dendrol, aes(x=sitequal, y=logmarba, fill=group)) + 
   geom_boxplot() +  
   stat_boxplot(geom ='errorbar') + 
-  #stat_summary(fun.data = give.n, geom = "text", position = position_dodge(width = 0.75), size = 4) +
   theme_minimal() + 
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
   scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
@@ -24,8 +19,6 @@ ggplot(dendrol, aes(x=sitequal, y=logmarba, color=group)) +
   theme_bw() +
   theme(axis.title.y = element_text(vjust= 1.8), axis.title.x = element_text(vjust= -0.5), axis.title = element_text(face = "bold")) +
   scale_color_manual(values = c("black", "blue"))
-
-
 
 #option to just dodge
   geom_point(position = position_dodge(width=0.75)) 

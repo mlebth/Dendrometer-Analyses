@@ -3,7 +3,7 @@ library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelec
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
-dendrol <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-4.csv')
+dendrol <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
 
 #making month a factor variable
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
@@ -13,31 +13,20 @@ dendrol$year <- factor(dendrol$year)
 dendrol$spnum <- factor(dendrol$spnum)
 dendrol$sitequal <- factor(dendrol$sitequal)
 
-#data transformations
-dendrol$sqmarba<-sqrt(dendrol$marba)
 #log transform--adding one to deal with 0's--0 transforms to 0
-dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible  
+dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible
+qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba") 
 
-#separate datasets for each species grouping
-hwood <- subset(dendrol,spcode=='QUMO'|spcode=='QURU'|spcode=='QUAL'|spcode=='POGR'|spcode=='CATO'|spcode=='ACRU'|spcode=='BELE')
-swood <- subset(dendrol,spcode=='PIST' | spcode=='TSCA')
-poplar<- dendrol[dendrol$spcode=='LITU',]
-###create var for group insteadblack birch
+#hardwoods v softwoods
 dendrol$group <- ifelse((dendrol$spcode=='QUMO'|dendrol$spcode=='QURU'|dendrol$spcode=='QUAL'|dendrol$spcode=='POGR'|dendrol$spcode=='CATO'|
-                           dendrol$spcode=='ACRU'|dendrol$spcode=='BELE'), 'hwood', 
-                        ifelse((dendrol$spcode=='PIST'|dendrol$spcode=='TSCA'), 'swood', 
-                               ifelse((dendrol$spcode=='LITU'                       ), 'pplar',
-                                      "NA")))
+                           dendrol$spcode=='ACRU'|dendrol$spcode=='BELE'|dendrol$spcode=='LITU'), 'hwood', 
+                        ifelse((dendrol$spcode=='PIST'|dendrol$spcode=='TSCA'), 'swood',"NA"))
 #seasonality variable
 dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'ngr',
                          ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'gro',
                                 "NA"))
 #new dataset for summer months only
 summer<-dendrol[dendrol$season=='gro',]
-
-#maybe try to pool rainfall?
-dendrol$poolrain <- ifelse((dendrol$season=='ngr'),dendrol$poolrain=mean(dendrol$rain),
-                    ifelse((dendrol$season=='gro'),dendrol$poolrain=mean(dendrol$rain), NA))
 
 #vif function
 vif.lme <- function (fit) {
@@ -58,24 +47,31 @@ vif.lme <- function (fit) {
 modellm<- lm(rain ~ season, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and season are positively related
 
 #exploring relationship between rainfall and month
-modellm<- lm(rain ~ month, data=dendrol);summary(modellm) #p<0.0001 -- mostly in the growting season
+modellm<- lm(rain ~ month, data=dendrol);summary(modellm);Anova(modellm) #p<0.0001 -- mostly in the growing season
 
 
 #exploring relationship between age and initial size
 dat2015 <- subset(dendrol,year == 2015); dat2016 <- subset(dendrol,year == 2016); dat2017 <- subset(dendrol,year == 2017)
 xyplot(baselineinddbh~age, data=dat2015, groups=group, auto.key = TRUE)
-modelaov<- aov(baselineinddbh ~ age, data=dendrol);summary(modelaov) #p<0.0001 -- age and size are positively related
-qqnorm(resid(modelaov));qqline(resid(modelaov)) 
+modellm<- aov(baselineinddbh ~ age, data=dendrol);summary(modellm) #p<0.0001 -- age and size are positively related
+qqnorm(resid(modellm));qqline(resid(modellm)) 
 
 #relationship between age and marginal growth
-modelaov<- aov(logmarba~age, data=dendrol);summary(modelaov) #p=0.25 -- no relationship observed between age and marginal growth
+modellm<- aov(logmarba~age, data=dendrol);summary(modellm) #p=0.11 -- no relationship observed between age and marginal growth
 xyplot(logmarba~age, data=dendrol, groups=group, auto.key = TRUE)
-qqnorm(resid(modelaov));qqline(resid(modelaov)) 
+qqnorm(resid(modellm));qqline(resid(modellm)) 
 
 #relationship between age and size each year
-modelaov<- aov(newdbh~age, data=dendrol);summary(modelaov) #p=0.001 -- positive relationship between age and size each year
+modellm<- lm(newdbh~age, data=dendrol);summary(modellm) #p=0.65 -- no relationship between age and size
 xyplot(newdbh~age, data=dendrol, groups=group, auto.key = TRUE)
-qqnorm(resid(modelaov));qqline(resid(modelaov)) 
+qqnorm(resid(modellm));qqline(resid(modellm)) 
+
+#relationship size and month yeach year
+dat2015 <- subset(dendrol,year == 2015); dat2016 <- subset(dendrol,year == 2016); dat2017 <- subset(dendrol,year == 2017)
+xyplot(prevmeasdbh~month, data=dat2015, groups=group, auto.key = TRUE)
+boxplot(prevmeasdbh~month, data=dat2015, groups=group, auto.key = TRUE)
+modellm<- lm(prevmeasdbh~month + group, data=dendrol);summary(modellm); Anova(modellm)
+qqnorm(resid(modellm));qqline(resid(modellm))
 
 ###############################Variables:
 #treeid [char]           = individual tree id 
@@ -106,8 +102,6 @@ qqnorm(resid(modelaov));qqline(resid(modelaov))
 #age                     = tree age (from cores)
 
 
-#########add figure: month by month and by timbersale
-
 ########### all variables (without interactions)--testing for multicollinearity using VIF
 modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + newdbh + age + aspect + azadj 
                 + rain + temp + near + (1|site/treeid), data=dendrol) #all variables
@@ -135,23 +129,25 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) #original:1713
 
-#let the selection process begin:
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
-                + age:season
-                + group:sitequal + group:timbersale + group:season + group:year 
+###this is the one--final model!
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain 
+                + group:sitequal + group:timbersale + group:season 
+                + age:season 
                 + (1|site/treeid), data=dendrol) 
-AICc(modlmer) 
-#-age:rain (1700), -age:near (1685), -age:temp (1670), -age:aspect (1667), -age:year (1648), -age:timbersale (1641), -age:sitequal (1631)
-#-group:rain (1624), -group:temp (1612), -age:group (1606), -group:near (1602)
-#-baselinestandBA (1593), -baselineinddbh (1590), -temp (1586), -near (1577)
-#NOTE I did try using newdbh (size) instead of age--resulted in poorer fits
+AICc(modlmer) #original:1647
+#age-aspect(1714),age-near(1699),age-rain(1686),age-temp(1672),age-year(1654),age-timbersale(1641),age-sitequal(1636).
+#group-rain(1633),group-temp(1627),group-year(1623),
+#baselinestandBA(1614),baselineinddbh(1612),temp(1608)
+#removing more interactions: age-group(1606) [removed because it doesn't make sense], group-near(1603), near (1594)
 qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
 summary(modlmer);Anova(modlmer)
 
-#lsmeans fpr all categorical interactions
-grouptimber <- lsmeans(modlmer, list(pairwise ~ group|timbersale))
-groupseason <- lsmeans(modlmer, list(pairwise ~ group|season))
-groupyear   <- lsmeans(modlmer, list(pairwise ~ group|year))
+#lsmeans for all categorical interactions
+year <- lsmeans(modlmer, list(pairwise ~ year))
+groupsitequal <- emmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~sitequal|group))
+grouptimber   <- lsmeans(modlmer, list(pairwise ~ group|timbersale, pairwise~timbersale|group))
+groupseason   <- lsmeans(modlmer, list(pairwise ~ group|season, pairwise~season|group))
+
 
 #tables
 with(dendrol, table(timbersale, group))

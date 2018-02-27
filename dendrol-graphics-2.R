@@ -1,3 +1,15 @@
+#simple plots for visualization
+boxplot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="Marginal growth of log basal area",main="Month")
+plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="Marginal growth of log basal area",main="Year")
+
+plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ year, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ rain, data=dendrol,xlab="Rainfall",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+
 
 #rainfall and season
 
@@ -10,8 +22,8 @@ library(jtools)
 interact_plot(modlmer,pred="age",modx="season",plot.points=TRUE,
               x.label="Age", y.label="Marginal growth of log basal area",
               main.title="Age x Season", legend.main="Season") +
-              theme_minimal() + 
-              theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) 
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) 
 
 
 interact_plot(modlmer,pred="rain",modx="group",plot.points=TRUE,
@@ -28,6 +40,33 @@ boxplot(rain ~ month, data=dendrol,xlab="Month",ylab="Total precipitation (cm)",
 cat_plot(modlmer, pred = timbersale, modx = group, interval = FALSE, plot.points = TRUE)
 cat_plot(modlmer, pred = timbersale, modx = group)
 #sig. interactions: group and: timbersale, season
+
+library(multcompView)
+library(lsmeans)
+marginal = lsmeans(modlmer, ~ timbersale:group)
+CLD = cld(marginal, alpha=0.05, Letters=letters, adjust="tukey"); CLD
+### Order the levels for printing
+
+CLD$timbersale = factor(CLD$timbersale, levels=c("N", "Y"))
+CLD$group = factor(CLD$group, levels=c("hwood", "swood")); CLD
+
+###  Remove spaces in .group  
+
+CLD$.group=gsub(" ", "", CLD$.group)
+pd=position_dodge(0.4)
+ggplot(CLD, aes(x=timbersale, y=lsmean, color=group, label=.group)) +  
+  geom_point(shape=15, size=3, position=pd) +  
+  geom_errorbar(width=.2, size=1,aes(ymin=lower.CL, ymax=upper.CL),position=pd) +
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + 
+  labs(x="Timbersale",y="Log of marginal basal area",title="Thin X Group") +
+  scale_color_manual(values=c("#999999", "#56B4E9"),name="Group") +
+  scale_color_manual (values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) 
+  geom_text(nudge_x = c(0.1, -0.1, 0.1, -0.1), nudge_y = c(2.25, 3.5, 3.5,  2.25), color = "black") 
+
+
+
+
 
 #timbersale and group
 ggplot(dendrol, aes(x=timbersale, y=logmarba, fill=group)) + 
@@ -134,3 +173,14 @@ ggplot(dendrol, aes(x=year, y=logmarba, fill=year)) +
   scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
   labs(x = "Year", y="Marginal growth of log basal area", title="Effect of year") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge  
+
+#stripchart
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+stripchart(logmarba ~ sitequal, vertical=TRUE, data=dendrol, method="jitter", jitter=0.175, add=TRUE, pch=20, col="blue", xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+
+#plot of random effect coefficients (treeid)
+growth_subject <- fixef(modlmer) + ranef(modlmer)$treeid
+growth_subject$treeid<-rownames(growth_subject)
+names(growth_subject)[1]<-"Intercept"
+growth_subject <- growth_subject[,c(2,1)]
+ggplot(growth_subject,aes(x=treeid,y=Intercept))+geom_point()
