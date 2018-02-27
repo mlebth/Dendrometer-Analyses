@@ -1,38 +1,36 @@
-#simple plots for visualization
-boxplot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
-plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="Marginal growth of log basal area",main="Month")
-plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="Marginal growth of log basal area",main="Year")
-
-plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
-plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ year, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ rain, data=dendrol,xlab="Rainfall",ylab="May growth",main="May growth~site quality")
-plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
-
-
 #rainfall and season
 
 ### 85% confidence intervals instead of 95%
 #### overwinter change/total annual change -- either total annual, or october-april--include (annual) precipitation
-###########!!!!!!!!!!!!!!!!!!!!don't have og basal area each may! this throws everything off!?!?!?
+#how to test whether individual slopes differ from 0?
 
-library(jtools)
-#plotting continuous v categorical interactions painlessly:
+library(jtools) #plotting continuous v categorical interactions painlessly:
+#age and season
 interact_plot(modlmer,pred="age",modx="season",plot.points=TRUE,
               x.label="Age", y.label="Marginal growth of log basal area",
               main.title="Age x Season", legend.main="Season") +
   theme_minimal() + 
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) 
 
+#rainfall
+ggplot(modlmer, aes(x=rain, y=logmarba)) +
+  geom_point(shape=1) +    # Use hollow circles
+  geom_smooth(method=lm,   # Add linear regression line
+              se=FALSE)    # Don't add shaded confidence region
 
-interact_plot(modlmer,pred="rain",modx="group",plot.points=TRUE,
-              x.label="rain", y.label="Marginal growth of log basal area",
-              main.title="rain x group", legend.main="group") +
-  theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) 
+plot(dendrol$rain, dendrol$logmarba, xlim=c(min(dendrol$rain)-5, max(dendrol$rain)+5), ylim=c(min(dendrol$logmarba)-10, max(dendrol$logmarba)+10))
+abline(modlmer, lwd=2)
+# calculate residuals and predicted values
+res <- signif(residuals(modlmer), 5)
+pre <- predict(modlmer) # plot distances between points and the regression line
+segments(rain, logmarba, rain, pre, col="red")
 
-#not working: scale_colour_discrete(name="Season",breaks=c("gro","ngr"),labels=c("Growing", "Non-Growing")) 
+# add labels (res values) to points
+library(calibrate)
+textxy(rain, logmarba, res, cx=0.7)
+
+
+
 
 boxplot(rain ~ season, data=dendrol,xlab="Season",ylab="Total precipitation (cm)",main="Season-rain")
 boxplot(rain ~ month, data=dendrol,xlab="Month",ylab="Total precipitation (cm)",main="Month-rain")

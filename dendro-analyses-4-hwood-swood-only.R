@@ -148,17 +148,25 @@ groupsitequal <- emmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~siteq
 grouptimber   <- lsmeans(modlmer, list(pairwise ~ group|timbersale, pairwise~timbersale|group))
 groupseason   <- lsmeans(modlmer, list(pairwise ~ group|season, pairwise~season|group))
 
-
 #tables
 with(dendrol, table(timbersale, group))
 with(dendrol, table(season, group))
 with(dendrol, table(year, group))
 
 
+######visualizations of raw data--see 'dendrol-graphics-2.R' for final figures
+#simple plots for visualization
+boxplot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="Marginal growth of log basal area",main="Month")
+plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="Marginal growth of log basal area",main="Year")
+plot(logmarba ~ spcode, data=dendrol,xlab="Timbersale",ylab="May growth",main="May growth~timbersale")
+plot(logmarba ~ timbersale, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ month, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ year, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ rain, data=dendrol,xlab="Rainfall",ylab="May growth",main="May growth~site quality")
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="May growth",main="May growth~site quality")
+
 #sig. interactions: group and: timbersale, season, year; season:age
-#age and season
-ggplot(dendrol, aes(x=age, y=logmarba, fill=season)) + geom_boxplot() + stat_boxplot(geom ='errorbar') + theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) + scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) 
 #age and season (scatterplot)
 ggplot(dendrol, aes(x=age, y=logmarba, color=season)) + 
   geom_point(size=3, alpha=0.75) +
@@ -202,12 +210,3 @@ ggplot(dendrol, aes(x=year, y=logmarba, fill=group)) +
   scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
   labs(x = "Year", y="Marginal growth of log basal area", title="Group*Year") +
   geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge   
-
-
-#summary of results for summer and dendro:
-# positive with sitequal and rain (also with timbersale, season and year, but those are all in interactions)
-# interactions:
-#   season:age (younger trees grow faster in summer)
-#   group:timbersale (softwood grow fastest in thinned areas)
-#   group:season (poplar grow fastest in growing season)
-#   group:year (hardwood grow most in 2015, poplar in 2015 and 2016, softwood in 2015 and 2016)
