@@ -43,6 +43,7 @@ vif.lme <- function (fit) {
 
 #exploring relationship between rainfall and season
 modellm<- lm(rain ~ season, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and season are positively related
+boxplot(rain ~ season, data=dendrol,xlab="season",ylab="precip",main="precip-season")
 
 #exploring relationship between rainfall and month
 modellm<- lm(rain ~ month, data=dendrol);summary(modellm);Anova(modellm) #p<0.0001 -- mostly in the growing season
@@ -125,14 +126,27 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
                 + group:sitequal + group:timbersale + group:year + group:season + group:temp + group:rain + group:near 
                 + age:sitequal   + age:timbersale   + age:year   + age:season   + age:temp   + age:rain   + age:near   + age:aspect
                 + (1|site/treeid), data=dendrol) 
-AICc(modlmer) #original:1713
+AICc(modlmer) #original:1686
+
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + 
+                + group:sitequal + group:timbersale + group:season
+                + age:season  
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer) #original:1560
+
+###note 3-1-18--maybe this is the final model? removed rain. too much overlap between season and rain.
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 
+                + group:sitequal + group:timbersale + group:season 
+                + age:season
+                + (1|site/treeid), data=dendrol) 
+AICc(modlmer)
 
 ###this is the one--final model!
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
                 + group:sitequal + group:timbersale + group:season 
                 + age:season
                 + (1|site/treeid), data=dendrol) 
-AICc(modlmer) #original:1647
+AICc(modlmer) #original:1686
 #age-aspect(1714),age-near(1699),age-rain(1686),age-temp(1672),age-year(1654),age-timbersale(1641),age-sitequal(1636).
 #group-rain(1633),group-temp(1627),group-year(1623),
 #baselinestandBA(1614),baselineinddbh(1612),temp(1608)
@@ -150,7 +164,6 @@ groupseason   <- lsmeans(modlmer, list(pairwise ~ group|season, pairwise~season|
 with(dendrol, table(timbersale, group))
 with(dendrol, table(season, group))
 with(dendrol, table(year, group))
-
 
 ######visualizations of raw data--see 'dendrol-graphics-2.R' for final figures
 #simple plots for visualization

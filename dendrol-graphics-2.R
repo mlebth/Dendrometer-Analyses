@@ -64,7 +64,7 @@ ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +
         plot.title = element_text(size=18))  + 
   labs(x="Season",y="Log of marginal basal area",title="Season X Group") +
   scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
-  geom_text(nudge_x = c(0.1, -0.1, -0.1, 0.1), nudge_y = c(4.95, 2.1, 3.8, 3.3), color = "black") 
+  geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(3.3, 4, 4, 3.3), color = "black") 
 
 #######group x sitequal
 marginal = emmeans(modlmer, ~ sitequal:group)
@@ -101,7 +101,7 @@ ggplot(CLD, aes(x=year, y=emmean, label=.group)) +
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
   labs(x="Year",y="Log of marginal basal area",title="Year") +
-  geom_text(nudge_y = c(3.2, 3.3, 3.15), color = "black") 
+  geom_text(nudge_y = c(3.25, 3.4, 3.25), color = "black") 
 
 #######boxplots
 #timbersale and group
