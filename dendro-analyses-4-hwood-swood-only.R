@@ -15,18 +15,16 @@ dendrol$sitequal <- factor(dendrol$sitequal)
 
 #log transform--adding one to deal with 0's--0 transforms to 0
 dendrol$logmarba<-log(dendrol$marba+1)  ###0's---inf, not possible
-qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba") 
+#qqnorm(dendrol$logmarba,main="logmarba");qqline(dendrol$logmarba,main="logmarba") 
 
 #hardwoods v softwoods
 dendrol$group <- ifelse((dendrol$spcode=='QUMO'|dendrol$spcode=='QURU'|dendrol$spcode=='QUAL'|dendrol$spcode=='POGR'|dendrol$spcode=='CATO'|
                            dendrol$spcode=='ACRU'|dendrol$spcode=='BELE'|dendrol$spcode=='LITU'), 'hwood', 
                         ifelse((dendrol$spcode=='PIST'|dendrol$spcode=='TSCA'), 'swood',"NA"))
 #seasonality variable
-dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'ngr',
-                         ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'gro',
+dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'Non-growing',
+                         ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'Growing',
                                 "NA"))
-#new dataset for summer months only
-summer<-dendrol[dendrol$season=='gro',]
 
 #vif function
 vif.lme <- function (fit) {
@@ -130,9 +128,9 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
 AICc(modlmer) #original:1713
 
 ###this is the one--final model!
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain 
+modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + rain
                 + group:sitequal + group:timbersale + group:season 
-                + age:season 
+                + age:season
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) #original:1647
 #age-aspect(1714),age-near(1699),age-rain(1686),age-temp(1672),age-year(1654),age-timbersale(1641),age-sitequal(1636).
