@@ -4,12 +4,19 @@
 #### overwinter change/total annual change -- either total annual, or october-april--include (annual) precipitation
 #how to test whether individual slopes differ from 0?
 
-library(jtools) #plotting continuous v categorical interactions painlessly:
 #age and season
-interact_plot(modlmer,pred="age",modx="season",plot.points=TRUE,x.label="Tree age", y.label="Marginal growth of log basal area",
-              main.title="Age x Season", legend.main="Season") +
-  theme_minimal() + 
-  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid"),plot.title = element_text(size=18)) 
+ggplot(dendrol, aes(x=age, y=logmarba, color=season)) + 
+  geom_point(shape=19, size=2.3,position=position_jitter(w=0.1, h=0.1)) +
+  geom_abline(aes(intercept=4.15568,slope=-0.02622,color="Growing"),size=1,linetype=1) +
+  geom_abline(aes(intercept=-0.1167,slope=0.00273,color="Non-growing"),size=1,linetype=2) +
+  theme_bw() + 
+  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
+        panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
+        plot.title = element_text(size=18)) +
+  scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
+  labs(x = "Tree age", y="Marginal growth of log basal area", title="Age x Season") +
+  scale_color_manual(values=c("green4", "navajowhite3"),name="Season",breaks = c("Growing", "Non-growing"), labels=c("Growing", "Non-growing")) 
+
 
 #rainfall
 ggplot(dendrol, aes(x=rain, y=logmarba)) + 
