@@ -5,18 +5,17 @@
 #how to test whether individual slopes differ from 0?
 
 #age and season
-ggplot(dendrol, aes(x=age, y=logmarba, color=season)) + 
-  geom_point(shape=19, size=2.3,position=position_jitter(w=0.1, h=0.1)) +
-  geom_abline(aes(intercept=4.15568,slope=-0.02622,color="Growing"),size=1,linetype=1) +
-  geom_abline(aes(intercept=-0.1167,slope=0.00273,color="Non-growing"),size=1,linetype=2) +
+ggplot(dendrol, aes(x=age, y=logmarba, shape=season)) + 
+  geom_point(aes(colour=season), size=2.3,position=position_jitter(w=0.1, h=0.1)) +
+  scale_colour_grey(start=0,end=.7) +
+  geom_abline(aes(intercept=4.15568,slope=-0.02622),size=1,linetype=1, color="black") +
+  geom_abline(aes(intercept=-0.1167,slope=0.00273),size=1,linetype=2, color="grey") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
-  labs(x = "Tree age", y="Marginal growth of log basal area", title="Age x Season") +
-  scale_color_manual(values=c("green4", "navajowhite3"),name="Season",breaks = c("Growing", "Non-growing"), labels=c("Growing", "Non-growing")) 
-
+  labs(x = "Tree age", y="Marginal growth of log basal area", title="Age x Season") 
 
 
 #rainfall
@@ -46,13 +45,14 @@ pd=position_dodge(0.4)
 ggplot(CLD, aes(x=timbersale, y=emmean, color=group, label=.group)) +  
   geom_point(shape=15, size=4, position=pd) +  
   geom_errorbar(width=.2, size=1.5,aes(ymin=lower.CL, ymax=upper.CL),position=pd) +
+  scale_colour_grey() +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_x_discrete(breaks=c("N","Y"),labels=c("Unthinned", "Thinned")) +
   labs(x="Treatment",y="Log of marginal basal area",title="Treatment X Group") +
-  scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
   geom_text(nudge_x = c(0.1, -0.1, -0.1, 0.1), nudge_y = c(2.5, 2, 1.9, 2.55), color = "black") 
 
 #######group x season
@@ -68,12 +68,13 @@ pd=position_dodge(0.4)
 ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +  
   geom_point(shape=15, size=4, position=pd) +  
   geom_errorbar(width=.2, size=1.5,aes(ymin=lower.CL, ymax=upper.CL),position=pd) +
+  scale_colour_grey() +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
   labs(x="Season",y="Log of marginal basal area",title="Season X Group") +
-  scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
   geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.15, 2.1, 1.8), color = "black") 
 
 #######group x sitequal
@@ -178,7 +179,7 @@ ggplot(dendrol, aes(x=rain, y=logmarba, color=rain)) +
   theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
   scale_y_continuous(expand = c(0, 0), limits=c(0,8.5))  +
   labs(x = "Monthly Precipitation", y="Marginal growth of log basal area", title="Effect of rainfall")
- 
+
 #stripchart
 plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
 stripchart(logmarba ~ sitequal, vertical=TRUE, data=dendrol, method="jitter", jitter=0.175, add=TRUE, pch=20, col="blue", xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")

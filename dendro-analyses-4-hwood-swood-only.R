@@ -151,7 +151,7 @@ AICc(modlmer) #original:1686
 #group-rain(1633),group-temp(1627),group-year(1623),
 #baselinestandBA(1614),baselineinddbh(1612),temp(1608)
 #removing more interactions: age-group(1606) [removed because it doesn't make sense], group-near(1603), near (1594)
-qqnorm(resid(modlmer));qqline(resid(modlmer),main="q-q plot mixed") 
+qqnorm(resid(modlmer));qqline(resid(modlmer)) 
 summary(modlmer);Anova(modlmer)
 
 #lsmeans for all categorical interactions
