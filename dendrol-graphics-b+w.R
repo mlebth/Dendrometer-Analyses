@@ -15,24 +15,12 @@ ggplot(dendrol, aes(x=age, y=logmarba, shape=season)) +
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
-  labs(x = "Tree age", y="Marginal growth of log basal area", title="Age x Season") 
-
-
-#rainfall
-ggplot(dendrol, aes(x=rain, y=logmarba)) + 
-  geom_point(shape=16, size=2, color="blue3") +
-  geom_abline(aes(intercept=5.510796,slope=-0.159328)) +
-  theme_bw() + 
-  theme(panel.border = element_blank(), panel.grid.major = element_blank(),
-        panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
-        plot.title = element_text(size=18)) +
-  scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
-  labs(x = "Total monthly precipitation", y="Marginal growth of log basal area", title="Precipitation")
+  labs(x = "Tree age", y="Marginal growth of log basal area") 
 
 library(multcompView)
 #timbersale x group
 marginal = emmeans(modlmer, ~ timbersale:group)
-CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
+CLD = cld(marginal, alpha=0.15, Letters=letters, level=0.85)
 ### Order the levels for printing
 CLD$timbersale = factor(CLD$timbersale, levels=c("N", "Y"))
 CLD$group = factor(CLD$group, levels=c("hwood", "swood")); CLD
@@ -51,9 +39,9 @@ ggplot(CLD, aes(x=timbersale, y=emmean, color=group, label=.group)) +
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_x_discrete(breaks=c("N","Y"),labels=c("Unthinned", "Thinned")) +
-  labs(x="Treatment",y="Log of marginal basal area",title="Treatment X Group") +
+  labs(x="Treatment",y="Log of marginal basal area") +
   scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
-  geom_text(nudge_x = c(0.1, -0.1, -0.1, 0.1), nudge_y = c(2.5, 2, 1.9, 2.55), color = "black") 
+  geom_text(nudge_x = c(0.1, -0.1, -0.1, 0.1), nudge_y = c(2.4, 1.9, 1.8, 2.55), color = "black") 
 
 #######group x season
 marginal = emmeans(modlmer, ~ season:group)
@@ -73,9 +61,9 @@ ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Season",y="Log of marginal basal area",title="Season X Group") +
+  labs(x="Season",y="Log of marginal basal area") +
   scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
-  geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.15, 2.1, 1.8), color = "black") 
+  geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.1, 2.1, 1.75), color = "black") 
 
 #######group x sitequal
 marginal = emmeans(modlmer, ~ sitequal:group)
@@ -94,8 +82,8 @@ ggplot(CLD, aes(x=sitequal, y=emmean, color=group, label=.group)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Site Quality",y="Log of marginal basal area",title="Site Quality X Group") +
-  scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood"))
+  labs(x="Site Quality",y="Log of marginal basal area") +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood"))
 
 #year
 marginal = emmeans(modlmer, ~ year)
@@ -107,14 +95,14 @@ pd=position_dodge(0.4)
 #CLD$backmean <- (exp(1)^CLD$emmean);CLD$backdown <- (exp(1)^CLD$lower.CL);CLD$backup <- (exp(1)^CLD$upper.CL)
 #sitequal x group
 ggplot(CLD, aes(x=year, y=emmean, label=.group)) +  
-  geom_point(shape=15, size=4, position=pd, color="forestgreen") +  
-  geom_errorbar(width=.2, size=1.5,aes(ymin=lower.CL, ymax=upper.CL),position=pd, color="forestgreen") +
+  geom_point(shape=15, size=4, position=pd, color="black") +  
+  geom_errorbar(width=.2, size=1.5,aes(ymin=lower.CL, ymax=upper.CL),position=pd, color="black") +
   theme_bw() + 
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Year",y="Log of marginal basal area",title="Year") +
-  geom_text(nudge_y = c(1.7, 1.8, 1.7), color = "black") 
+  labs(x="Year",y="Log of marginal basal area") +
+  geom_text(nudge_y = c(1.67, 1.73, 1.65), color = "black") 
 
 #######boxplots
 #timbersale and group
