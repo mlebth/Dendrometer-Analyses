@@ -15,7 +15,8 @@ ggplot(dendrol, aes(x=age, y=logmarba, shape=season)) +
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
-  labs(x = "Tree age", y="Marginal growth of log basal area") 
+  xlab("Site Quality") +
+  ylab(bquote(~Log[e]~(marginal~basal~area)))
 
 library(multcompView)
 #timbersale x group
@@ -39,8 +40,9 @@ ggplot(CLD, aes(x=timbersale, y=emmean, color=group, label=.group)) +
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18)) +
   scale_x_discrete(breaks=c("N","Y"),labels=c("Unthinned", "Thinned")) +
-  labs(x="Treatment",y="Log of marginal basal area") +
-  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
+  xlab("Treatment") +
+  ylab(bquote(~Log[e]~(marginal~basal~area))) +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer")) +
   geom_text(nudge_x = c(0.1, -0.1, -0.1, 0.1), nudge_y = c(2.4, 1.9, 1.8, 2.55), color = "black") 
 
 #######group x season
@@ -61,8 +63,9 @@ ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Season",y="Log of marginal basal area") +
-  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood")) +
+  xlab("Season") +
+  ylab(bquote(~Log[e]~(marginal~basal~area))) +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer")) +
   geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.1, 2.1, 1.75), color = "black") 
 
 #######group x sitequal
@@ -82,8 +85,9 @@ ggplot(CLD, aes(x=sitequal, y=emmean, color=group, label=.group)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Site Quality",y="Log of marginal basal area") +
-  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Hardwood", "Softwood"))
+  xlab("Site Quality") +
+  ylab(bquote(~Log[e]~(marginal~basal~area))) +
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer"))
 
 #year
 marginal = emmeans(modlmer, ~ year)
@@ -101,7 +105,8 @@ ggplot(CLD, aes(x=year, y=emmean, label=.group)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18))  + 
-  labs(x="Year",y="Log of marginal basal area") +
+  xlab("Year") +
+  ylab(bquote(~Log[e]~(marginal~basal~area))) +
   geom_text(nudge_y = c(1.67, 1.73, 1.65), color = "black") 
 
 #######boxplots

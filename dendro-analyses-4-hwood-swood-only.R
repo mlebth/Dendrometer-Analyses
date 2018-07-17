@@ -41,6 +41,8 @@ vif.lme <- function (fit) {
   names(v) <- nam
   v }
 
+modelaov <- aov(age ~ dominance, data=dendrol); summary(modelaov)
+
 #exploring relationship between rainfall and season
 modellm<- lm(rain ~ season, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and season are positively related
 boxplot(rain ~ season, data=dendrol,xlab="season",ylab="precip",main="precip-season")
@@ -167,6 +169,7 @@ year <- emmeans(modlmer, list(pairwise ~ year))
 groupsitequal <- emmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~sitequal|group))
 grouptimber   <- emmeans(modlmer, list(pairwise ~ group|timbersale, pairwise~timbersale|group))
 groupseason   <- emmeans(modlmer, list(pairwise ~ group|season, pairwise~season|group))
+dominance <- emmeans(modlmer, list(pairwise ~ dominance))
 
 #tables
 with(dendrol, table(timbersale, group))
