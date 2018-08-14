@@ -87,7 +87,8 @@ ggplot(CLD, aes(x=sitequal, y=emmean, color=group, label=.group)) +
         plot.title = element_text(size=18))  + 
   xlab("Site Quality") +
   ylab(bquote(~Log[e]~(marginal~basal~area))) +
-  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer"))
+  scale_color_manual(values=c("black", "grey"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer")) +
+  scale_x_discrete(limits=c("3","2","1"), labels=c("3"="Low","2"="Moderate","1"="High")) 
 
 #year
 marginal = emmeans(modlmer, ~ year)

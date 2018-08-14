@@ -3,7 +3,7 @@ library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelec
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
-dendrol <- read.csv('F:/TU/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
+dendrol <- read.csv('D:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
 
 #making month a factor variable
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
