@@ -1,4 +1,4 @@
-
+library(multcompView); library(sjPlot); library(sjmisc)
 #crown class
 marginal = emmeans(modlmertreeid, ~ dominance)
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)

@@ -95,4 +95,4 @@ AICc(modlmer18) #original:821.50
 #baselinestandBAsqcm(747.37), baselineinddbhcm (744.74), near(739.75), aspect (737.62)
 qqnorm(resid(modlmer18));qqline(resid(modlmer18)) 
 summary(modlmer18);Anova(modlmer18,test.statistic="F")
-sig: groupxtrmt, groupxsitequal, groupxseason, sitequalxage
+#sig: groupxtrmt, groupxsitequal, groupxseason, sitequalxage

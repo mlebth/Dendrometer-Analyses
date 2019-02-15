@@ -13,17 +13,12 @@ ggplot(dendrol, aes(x=age, y=logmarba, color=season)) +
   theme(panel.border = element_blank(), panel.grid.major = element_blank(),
         panel.grid.minor = element_blank(), axis.line=element_line(colour="black", size=0.1, linetype = "solid"),
         plot.title = element_text(size=18), text = element_text(size=16)) +
-<<<<<<< HEAD
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,6.1)) + 
-=======
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
   labs(x = "Tree age", y="Marginal growth of log basal area", title="Age x Season") +
   ylab(bquote(~Log[e]~(marginal~basal~area))) +
   scale_color_manual(values=c("green4", "navajowhite3"),name="Season",breaks = c("Growing", "Non-growing"), labels=c("Growing", "Non-growing")) 
 
-
-<<<<<<< HEAD
 #age
 ggplot(dendrol, aes(x=age, y=logmarba)) + 
   geom_point(shape=16, size=2, color="blue3") +
@@ -34,9 +29,6 @@ ggplot(dendrol, aes(x=age, y=logmarba)) +
         plot.title = element_text(size=18)) +
   scale_y_continuous(expand = c(0, 0), limits=c(-0.5,8.5)) + 
   labs(x = "Age", y="Marginal growth of log basal area", title="Precipitation")
-
-=======
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 #rainfall
 ggplot(dendrol, aes(x=rain, y=logmarba)) + 
@@ -51,11 +43,8 @@ ggplot(dendrol, aes(x=rain, y=logmarba)) +
 
 library(multcompView)
 #timbersale x group
-<<<<<<< HEAD
 marginal = emmeans(modlmer2, ~ timbersale:group)
-=======
 marginal = emmeans(modlmer, ~ timbersale:group)
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
 ### Order the levels for printing
 CLD$timbersale = factor(CLD$timbersale, levels=c("N", "Y"))
