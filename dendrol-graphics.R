@@ -1,4 +1,32 @@
 
+#grouped boxplots
+ggplot(dendrol, aes(x=sitequal, y=logmarba, fill=group)) + 
+  geom_boxplot() +  
+  stat_boxplot(geom ='errorbar') + 
+  theme_minimal() + 
+  theme(axis.line=element_line(colour="black", size=0.1, linetype = "solid")) +
+  scale_y_continuous(expand = c(0, 0), limits=c(0,8.5)) + 
+  scale_fill_manual(values=c("#999999", "#E69F00", "#56B4E9"),name="Group",breaks = c("hwood", "pplar", "swood"), labels=c("Hardwood", "Poplar", "Softwood")) +
+  labs(x = "Site quality", y="Marginal growth of log basal area", title="Site quality") +
+  geom_point(position = position_jitterdodge(jitter.width=.0035, dodge.width=0.75))  #jitter and dodge 
+
+sum = summarySE(dendrol, measurevar="logmarba", groupvars=c("sitequal","group"))
+sum
+pd = position_dodge(.2)
+ggplot(dendrol, aes(x=sitequal, y=logmarba, color=group)) + 
+  geom_errorbar(aes(ymin=logmarba-se, ymax=logmarba+se), width=.2, size=0.7, position=pd) +
+  geom_point(shape=15, size=4, position=pd) +
+  theme_bw() +
+  theme(axis.title.y = element_text(vjust= 1.8), axis.title.x = element_text(vjust= -0.5), axis.title = element_text(face = "bold")) +
+  scale_color_manual(values = c("black", "blue"))
+
+#option to just dodge
+  geom_point(position = position_dodge(width=0.75)) 
+
+#with jitter overlay
+plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+stripchart(logmarba ~ sitequal, vertical=TRUE, data=dendrol, method="jitter", jitter=0.175, add=TRUE, pch=20, col="blue", xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+
 #lsmeans plots
 #year
 lsyear<-data.frame(year=c('2015','2016','2017'),cldown=c(-1.769739,-2.329213,-1.054521),mean=c(2.399255,1.598122,2.750009),clup=c(6.568250,5.525458,6.554539))
@@ -52,7 +80,8 @@ names(growth_subject)[1]<-"Intercept"
 growth_subject <- growth_subject[,c(2,1)]
 ggplot(growth_subject,aes(x=treeid,y=Intercept))+geom_point()
 
-plot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
+
+boxplot(logmarba ~ sitequal, data=dendrol,xlab="Site quality",ylab="Marginal growth of log basal area",main="Site quality")
 plot(logmarba ~ month, data=dendrol,xlab="Month",ylab="Marginal growth of log basal area",main="Month")
 plot(logmarba ~ year, data=dendrol,xlab="Year",ylab="Marginal growth of log basal area",main="Year")
 
