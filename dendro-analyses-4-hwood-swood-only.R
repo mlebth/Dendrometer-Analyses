@@ -1,20 +1,13 @@
-<<<<<<< HEAD
 #note 11/28/2018--2018 data were mostly fine, but i divided the May growth by 2.
 #this is because bands were zeroed on 4/10 and measured again on 5/31, which is closer to 2 months than 1.
 
 # all measurements have been translated to cm
-=======
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car);library(emmeans);library(AICcmodavg)
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
-<<<<<<< HEAD
 dendrol <- read.csv('G:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
-=======
-dendrol <- read.csv('D:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 #making month a factor variable
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
@@ -36,15 +29,12 @@ dendrol$group <- ifelse((dendrol$spcode=='QUMO'|dendrol$spcode=='QURU'|dendrol$s
 dendrol$season <- ifelse((dendrol$month=='may'|dendrol$month=='sep'|dendrol$month=='oct'),'Non-growing',
                          ifelse((dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'Growing',
                                 "NA"))
-<<<<<<< HEAD
 #1/3/2019--making a new seasonality var because with new data, avg may growth is non-zero.
 dendrol$season2 <- ifelse((dendrol$month=='sep'|dendrol$month=='oct'),'Non-growing',
                          ifelse((dendrol$month=='may'| dendrol$month=='jun'|dendrol$month=='jul'|dendrol$month=='aug'),'Growing',
                                 "NA"))
 
 dendrol18 <- dendrol[dendrol$year == 2018,]
-=======
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 #vif function
 vif.lme <- function (fit) {
@@ -70,19 +60,11 @@ ols_coll_diag(modellm)
 
 #exploring relationship between temp and season
 modellm<- lm(temp ~ season, data=dendrol);summary(modellm) #p<0.0001 -- temp and season are positively related
-<<<<<<< HEAD
 boxplot(temp ~ season, data=dendrol,xlab="season",ylab="temp",main="temp-season")
 
 #exploring relationship between temp and rainfall
 modellm<- lm(rain ~ temp, data=dendrol);summary(modellm) #p<0.0001 -- temp and season are positively related
 boxplot(rain ~ temp, data=dendrol,xlab="temp",ylab="precip",main="precip-season")
-=======
-boxplot(temp ~ season, data=dendrol,xlab="season",ylab="precip",main="precip-season")
-
-#exploring relationship between temp and rainfall
-modellm<- lm(rain ~ temp, data=dendrol);summary(modellm) #p<0.0001 -- temp and season are positively related
-boxplot(rain ~ temp, data=dendrol,xlab="rain",ylab="precip",main="precip-season")
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 #exploring relationship between rainfall and month
 modellm<- lm(rain ~ month, data=dendrol);summary(modellm);Anova(modellm) #p<0.0001 -- mostly in the growing season
@@ -90,13 +72,8 @@ modellm<- lm(rain ~ month, data=dendrol);summary(modellm);Anova(modellm) #p<0.00
 
 #exploring relationship between age and initial size
 dat2015 <- subset(dendrol,year == 2015); dat2016 <- subset(dendrol,year == 2016); dat2017 <- subset(dendrol,year == 2017)
-<<<<<<< HEAD
 xyplot(baselineinddbhcm~age, data=dat2015, groups=group, auto.key = TRUE)
 modellm<- aov(baselineinddbhcm ~ age, data=dendrol);summary(modellm) #p<0.0001 -- age and size are positively related
-=======
-xyplot(baselineinddbh~age, data=dat2015, groups=group, auto.key = TRUE)
-modellm<- aov(baselineinddbh ~ age, data=dendrol);summary(modellm) #p<0.0001 -- age and size are positively related
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 qqnorm(resid(modellm));qqline(resid(modellm)) 
 
 #relationship between age and marginal growth
@@ -126,13 +103,8 @@ qqnorm(resid(modellm));qqline(resid(modellm))
 #sitequal [num]          = site quality (1: , 2: , 3: ) 
 #timbersale [char]       = Y (thinned ) or N (unthinned) 
 #dominance [char]        = dominant (D), co-dominant (C), or intermediate (I) 
-<<<<<<< HEAD
 #baselinestandBAsqcm [num]   = stand basal area first installation (in inches) 
 #baselineinddbhcm [num]    = DBH of individual at date of first installation (in inches) 
-=======
-#baselinestandBA [num]   = stand basal area first installation (in inches) 
-#baselineinddbh [num]    = DBH of individual at date of first installation (in inches) 
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 #tension [char]          = lo, hi or na -- densiometer tension. only available for trees 1-24 (24-32: na) 
 #year [char]             = year 
 #month [char]            = month 
@@ -151,7 +123,6 @@ qqnorm(resid(modellm));qqline(resid(modellm))
 
 
 ########### all variables (without interactions)--testing for multicollinearity using VIF
-<<<<<<< HEAD
 modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect + azadj 
                 + rain + temp + near + (1|site/treeid), data=dendrol) #all variables
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect + near + (1|site/treeid), 
@@ -159,25 +130,12 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
 
 
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect + azadj 
-=======
-modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + year + baselinestandBA + baselineinddbh + age + aspect + azadj 
-                + rain + temp + near + (1|site/treeid), data=dendrol) #all variables
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBA + baselineinddbh + age + aspect + near + (1|site/treeid), 
-                data=dendrol) #refined variables
-
-
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBA + baselineinddbh + age + aspect + azadj 
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
                 + rain + temp + near + (1|site/treeid), data=dendrol) #all variables
 vif.lme(modlmer) #cutoff = 5; round 1: month to season; #round 2: spcode to group
 
 ########### model selection (dendrol)
 #try with either age or newdbh; and with azadj or aspect
-<<<<<<< HEAD
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect 
-=======
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBA + baselineinddbh + age + aspect 
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
                 + rain + temp + near + (1|site/treeid), data=dendrol) 
 AICc(modlmer) #age much better than newdbh, aspect slightly better than azadj
 
@@ -189,11 +147,7 @@ AICc(modlmer) #age much better than newdbh, aspect slightly better than azadj
 #not testing 3-way interactions 
 #######################
 #global model
-<<<<<<< HEAD
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + near + baselineinddbhcm + baselinestandBAsqcm
-=======
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect + near + baselineinddbh + baselinestandBA
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
                 + group:sitequal + group:timbersale + group:year + group:season + group:near 
                 + age:sitequal   + age:timbersale   + age:year   + age:season   + age:near   + age:aspect
                 + (1|site/treeid), data=dendrol) 
@@ -208,11 +162,7 @@ modellist<-list(mnull,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
 modnames<-c("mnull","m1","m2","m3","m4","m5","m6","m7","m8","m9","m10")
 aictab(modellist,modnames,second.ord=T)
 
-<<<<<<< HEAD
 ###this is the one--final model! [pre-2018. see below for update]
-=======
-###this is the one--final model!
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 
                 + group:sitequal + group:timbersale + group:season 
                 + age:season
@@ -220,7 +170,6 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
 AICc(modlmer) #original:1682.46
 #age-aspect(1674.45),age-near(1660.66),age-year(1616.57),age-timbersale(1609.40),age-sitequal(1597.38).
 #group-near(1593.75), group-year(1583.24),
-<<<<<<< HEAD
 #baselinestandBAsqcm(1573.82), near(1561.41)
 qqnorm(resid(modlmer));qqline(resid(modlmer)) 
 summary(modlmer);Anova(modlmer,test.statistic="F")
@@ -274,18 +223,6 @@ groupseason   <- emmeans(modlmer2, list(pairwise ~ group|season, pairwise~season
 dominance <- emmeans(modlmer2, list(pairwise ~ dominance))
 age <- emmeans(modlmer2, list(pairwise ~ age))
 aspect <- emmeans(modlmer2, list(pairwise ~ aspect))
-=======
-#baselinestandBA(1573.82), near(1561.41)
-qqnorm(resid(modlmer));qqline(resid(modlmer)) 
-summary(modlmer);Anova(modlmer,test.statistic="F")
-
-#lsmeans for all categorical interactions
-year <- emmeans(modlmer, list(pairwise ~ year))
-groupsitequal <- emmeans(modlmer, list(pairwise ~ group|sitequal, pairwise~sitequal|group))
-grouptimber   <- emmeans(modlmer, list(pairwise ~ group|timbersale, pairwise~timbersale|group))
-groupseason   <- emmeans(modlmer, list(pairwise ~ group|season, pairwise~season|group))
-dominance <- emmeans(modlmer, list(pairwise ~ dominance))
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 
 #tables
 with(dendrol, table(timbersale, group))
