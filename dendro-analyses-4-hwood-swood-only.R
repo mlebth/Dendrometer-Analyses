@@ -7,7 +7,14 @@ library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelec
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
-dendrol <- read.csv('G:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/dendrol-5.csv')
+dendrol <- read.csv('G:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/dendrol-6.csv')
+
+#checking for relationship between initial baseline measurements and 2018 re-measurements
+dendrolnewdata18 <- read.csv('G:/Postdoc/FIG/Dendrometer/Dendrometer Analyses/Dendro2018.csv')
+dendrolcheck <- merge(dendrol, dendrolnewdata18, by.x="treeid",by.y="treeid")
+baselinedbhcheck <- lm(baselineinddbhin18 ~ baselineinddbhin, data=dendrolcheck)
+summary(baselinedbhcheck) #p<0.0001 -- new data and old data are positively related
+plot(baselineinddbhin18 ~ baselineinddbhin, data=dendrolcheck,xlab="DBH (2018)",ylab="DBH (original baseline)",main="2018 v orig. DBH")
 
 #making month a factor variable
 dendrol$month<-factor(dendrol$month, levels=c("may", "jun", "jul", "aug", "sep", "oct"))
@@ -128,7 +135,6 @@ modlmer <- lmer(logmarba ~ spcode + sitequal + timbersale + dominance + month + 
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect + near + (1|site/treeid), 
                 data=dendrol) #refined variables
 
-
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + baselinestandBAsqcm + baselineinddbhcm + age + aspect + azadj 
                 + rain + temp + near + (1|site/treeid), data=dendrol) #all variables
 vif.lme(modlmer) #cutoff = 5; round 1: month to season; #round 2: spcode to group
@@ -152,15 +158,6 @@ modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + 
                 + age:sitequal   + age:timbersale   + age:year   + age:season   + age:near   + age:aspect
                 + (1|site/treeid), data=dendrol) 
 AICc(modlmer) #original:1686
-
-modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 
-               + group:sitequal + group:timbersale + group:season
-               + age:season  
-               + (1|site/treeid), data=dendrol) 
-AICc(mnull)
-modellist<-list(mnull,m1,m2,m3,m4,m5,m6,m7,m8,m9,m10)
-modnames<-c("mnull","m1","m2","m3","m4","m5","m6","m7","m8","m9","m10")
-aictab(modellist,modnames,second.ord=T)
 
 ###this is the one--final model! [pre-2018. see below for update]
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season + year + age + aspect 

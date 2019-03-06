@@ -72,9 +72,6 @@ ggplot(CLD, aes(x=season2, y=emmean, color=group, label=.group)) +
   geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.15, 2.1, 1.8), color = "black") 
 
 #######group x sitequal
-
-###work on this
-
 marginal = emmeans(modlmertreeid, ~ sitequal:group)
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
 ### Order the levels for printing
@@ -94,7 +91,7 @@ ggplot(CLD, aes(x=sitequal, y=emmean, color=group, label=.group)) +
   labs(x="Site Quality",y="Log of marginal basal area",title="Site Quality X Group") +
   ylab(bquote(~Log[e]~(marginal~basal~area))) +
   scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer")) +
-  geom_text(color="black") 
+  geom_text(color="black") +
 scale_x_discrete(limits=c("3","2","1"), labels=c("3"="Low","2"="Moderate","1"="High")) +
   geom_text(nudge_x = c(0.1, -0.1, -0.1, -0.1, 0.1, 0.1), nudge_y = c(3.8, .8, 2.75, 1.8, 0.8, 3.1), color = "black") 
 

@@ -70,27 +70,20 @@ ggplot(CLD, aes(x=timbersale, y=emmean, color=group, label=.group)) +
 
   
 #######group x season
-<<<<<<< HEAD
 marginal = emmeans(modlmer2, ~ season2:group)
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
 ### Order the levels for printing
 CLD$season2 = factor(CLD$season2, levels=c("Non-growing", "Growing"))
-=======
 marginal = emmeans(modlmer, ~ season:group)
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
 ### Order the levels for printing
 CLD$season = factor(CLD$season, levels=c("Non-growing", "Growing"))
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 CLD$group = factor(CLD$group, levels=c("hwood", "swood")); CLD
 ###  Remove spaces in .group  
 CLD$.group=gsub(" ", "", CLD$.group)
 pd=position_dodge(0.4)
 #season x group
-<<<<<<< HEAD
-ggplot(CLD, aes(x=season2, y=emmean, color=group, label=.group)) +  
-=======
-ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +  
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
+ggplot(CLD, aes(x=season2, y=emmean, color=group, label=.group)) +
   geom_point(shape=15, size=4, position=pd) +  
   geom_errorbar(width=.2, size=1.5,aes(ymin=lower.CL, ymax=upper.CL),position=pd) +
   theme_bw() + 
@@ -103,14 +96,8 @@ ggplot(CLD, aes(x=season, y=emmean, color=group, label=.group)) +
   geom_text(nudge_x = c(-0.1,0.1, 0.1, -0.1), nudge_y = c(1.75, 2.15, 2.1, 1.8), color = "black") 
 
 #######group x sitequal
-<<<<<<< HEAD
-
 ###work on this
-
 marginal = emmeans(modlmer2, ~ sitequal:group)
-=======
-marginal = emmeans(modlmer, ~ sitequal:group)
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 CLD = cld(marginal, alpha=0.05, Letters=letters, level=0.85)
 ### Order the levels for printing
 CLD$sitequal = factor(CLD$sitequal, levels=c("1", "2", "3"))
@@ -129,20 +116,16 @@ ggplot(CLD, aes(x=sitequal, y=emmean, color=group, label=.group)) +
   labs(x="Site Quality",y="Log of marginal basal area",title="Site Quality X Group") +
   ylab(bquote(~Log[e]~(marginal~basal~area))) +
   scale_color_manual(values=c("#999999", "#56B4E9"),name="Group",breaks = c("hwood", "swood"), labels=c("Broadleaf", "Conifer")) +
-<<<<<<< HEAD
   geom_text(color="black")
   scale_x_discrete(limits=c("3","2","1"), labels=c("3"="Low","2"="Moderate","1"="High")) +
   geom_text(nudge_x = c(0.1, -0.1, -0.1, -0.1, 0.1, 0.1), nudge_y = c(3.8, .8, 2.75, 1.8, 0.8, 3.1), color = "black") 
 
 #year
 marginal = emmeans(modlmer2, ~ year)
-=======
   scale_x_discrete(limits=c("3","2","1"), labels=c("3"="Low","2"="Moderate","1"="High")) 
-
 
 #year
 marginal = emmeans(modlmer, ~ year)
->>>>>>> 051ce002615bfd61497f1e21ef7372c3d1bd1cdc
 CLD = cld(marginal, alpha=0.05, Letters=letters, level = 0.85)
 ###  Remove spaces in .group  
 CLD$.group=gsub(" ", "", CLD$.group);CLD
