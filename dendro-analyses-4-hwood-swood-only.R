@@ -60,6 +60,10 @@ vif.lme <- function (fit) {
 
 modelaov <- aov(age ~ dominance, data=dendrol); summary(modelaov)
 
+#exploring relationship between rainfall and year
+modellm<- lm(rain ~ year, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and year are positively related
+boxplot(rain ~ year, data=dendrol,xlab="year",ylab="precip",main="precip-year")
+
 #exploring relationship between rainfall and season
 modellm<- lm(rain ~ season, data=dendrol);summary(modellm) #p<0.0001 -- rainfall and season are positively related
 boxplot(rain ~ season, data=dendrol,xlab="season",ylab="precip",main="precip-season")

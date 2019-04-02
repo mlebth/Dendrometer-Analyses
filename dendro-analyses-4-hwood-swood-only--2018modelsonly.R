@@ -7,7 +7,7 @@ AICc(modlmer) #original:2055.46\
 
 #testing for multicollinearity
 modlmer <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season2 + age + aspect + near + baselineinddbhcm + baselinestandBAsqcm
-                + (1|site/treeid), data=dendrol) 
+                + (1|treeid), data=dendrol) 
 vif.lme(modlmer) 
 
 #using new seasonality variable
@@ -24,15 +24,11 @@ AICc(modlmertreeid)
 
 #global model using treeid only--FINAL MODEL FOR 2018 ONLY
 ####3-4-19--trying with and without age:sitequal
-modlmertreeid <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season2 + age  
-                + group:sitequal + group:timbersale +  group:season2 
-                + age:sitequal
-                + (1|treeid), data=dendrol18) 
-AICc(modlmertreeid) #original:688.84
+modlmertreeid <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season2 + age + aspect  
+                      + group:sitequal + group:timbersale + group:season2
+                      + (1|treeid), data=dendrol) 
+AICc(modlmertreeid)
 ##### orig model had site/treeid as random, but was 'singular fit'. removed random.
-#age-aspect(814.49),age-near(796.26),age-season2(785.77), age-timbersale(776.17)
-#group-near(771.75),
-#baselinestandBAsqcm(747.37), baselineinddbhcm (744.74), near(739.75), aspect (735.24)
 qqnorm(resid(modlmertreeid));qqline(resid(modlmertreeid)) 
 summary(modlmertreeid);Anova(modlmertreeid,test.statistic="F")
 
@@ -45,12 +41,10 @@ modlmertreeid <- lmer(logmarba ~ group + sitequal + timbersale + dominance + sea
                 + (1|treeid), data=dendrol18) 
 
 
-m8 <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season2 + age   + aspect 
-                + group:sitequal + group:timbersale + group:season2 
-                + age:sitequal  
-                + (1|treeid), data=dendrol18) 
-vif.lme(modlmer) 
-AICc(m8)
+m10 <- lmer(logmarba ~ group + sitequal + timbersale + dominance + season2 + age + aspect   
+              + group:sitequal + group:timbersale + group:season2
+               + (1|treeid), data=dendrol) 
+AICc(m10)
 modellist<-list(mnull,m1,m2,m3,m4,m5,m6,m7,m8,m9)
 modnames<-c("mnull","m1","m2","m3","m4","m5","m6","m7","m8","m9")
 aictab(modellist,modnames,second.ord=F)
