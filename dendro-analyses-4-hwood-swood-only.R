@@ -3,7 +3,8 @@
 
 # all measurements have been translated to cm
 
-library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car);library(emmeans);library(AICcmodavg)
+library(glm2);library(lme4);library(ggplot2);library(MASS);library(ResourceSelection);library(plyr);library(car)
+library(emmeans);library(AICcmodavg)
 library(PerformanceAnalytics);library(Hmisc);library(nlme);library(Rmisc)
 
 #read-in 
